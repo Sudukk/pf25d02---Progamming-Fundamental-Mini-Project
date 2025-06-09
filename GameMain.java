@@ -5,6 +5,7 @@ import javax.swing.*;
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
  * The Board and Cell classes are separated in their own classes.
+ * This version prompts for player names and includes a score counter.
  */
 public class GameMain extends JPanel {
     private static final long serialVersionUID = 1L; // to prevent serializable warning
@@ -16,7 +17,6 @@ public class GameMain extends JPanel {
     public static final Color COLOR_CROSS = new Color(239, 105, 80); // Red #EF6950
     public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
 
-    // Mengubah font menjadi Segoe UI dengan style bold dan ukuran 14
     public static final Font FONT_STATUS = new Font("Segoe UI", Font.BOLD, 14);
 
     // Define game objects
@@ -24,10 +24,21 @@ public class GameMain extends JPanel {
     private State currentState; // the current state of the game
     private Seed currentPlayer; // the current player
     private JLabel statusBar; // for displaying status message
-    private JButton restartButton; // tombol untuk mengulang permainan baik salah satu menang atau remis.
+    private JButton restartButton; // button to restart the game
+
+    // Player names and scores
+    private String playerXName;
+    private String playerOName;
+    private int playerXScore;
+    private int playerOScore;
+    private JLabel scoreLabel; // Label to display the scores
 
     /** Constructor to setup the UI and game components */
-    public GameMain() {
+    public GameMain(String playerXName, String playerOName) {
+        this.playerXName = playerXName;
+        this.playerOName = playerOName;
+        this.playerXScore = 0;
+        this.playerOScore = 0;
 
         // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
@@ -48,10 +59,6 @@ public class GameMain extends JPanel {
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                     }
                 }
-                // menghapus kondisi jika `currentState` bukan `State.PLAYING`. Awalnya terdapat
-                // kondisi `else` yang berfungsi untuk
-                // mengulang permainan jika user mengklik `JPanel` alias `GameMain`, tetapi
-                // logika ini diurus oleh `restartButton`.
                 // Refresh the drawing canvas
                 repaint(); // Callback paintComponent().
             }
@@ -67,25 +74,36 @@ public class GameMain extends JPanel {
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
         super.setLayout(new BorderLayout());
-        // Ubah posisi `statusBar` menjadi dibawah
         super.add(statusBar, BorderLayout.PAGE_END);
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        // account for statusBar in height
+        // Adjust preferred size to account for the new top panel
+        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 60));
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
-        // inisialisasi `restartButton`
+        // --- UI for Score and Restart Button ---
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(COLOR_BG);
+
+        // Score Label Setup
+        scoreLabel = new JLabel();
+        scoreLabel.setFont(FONT_STATUS);
+        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        updateScoreLabel(); // Set initial score text
+        topPanel.add(scoreLabel, BorderLayout.CENTER);
+
+        // Initialize restartButton
         restartButton = new JButton("Play Again?");
         restartButton.setVisible(false);
         restartButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        topPanel.add(restartButton, BorderLayout.EAST); // Add button to the side
 
-        // Hal yang akan dilakukan `restartButton` jika user mengklik tombol.
+        // Add ActionListener to the restartButton
         restartButton.addActionListener(_ -> {
             newGame();
             repaint();
         });
 
-        // Atur posisi `restartButton` menjadi bagian bawah
-        super.add(restartButton, BorderLayout.PAGE_START);
+        // Add the whole top panel to the main frame
+        super.add(topPanel, BorderLayout.PAGE_START);
 
         // Set up Game
         initGame();
@@ -109,6 +127,11 @@ public class GameMain extends JPanel {
         currentState = State.PLAYING; // ready to play
     }
 
+    /** Helper method to update the score label text */
+    private void updateScoreLabel() {
+        scoreLabel.setText(playerXName + ": " + playerXScore + "   |   " + playerOName + ": " + playerOScore);
+    }
+
     /** Custom painting codes on this JPanel */
     @Override
     public void paintComponent(Graphics g) { // Callback via repaint()
@@ -119,36 +142,34 @@ public class GameMain extends JPanel {
 
         // Print status-bar message
         if (currentState == State.PLAYING) {
-            statusBar.setForeground(Color.BLACK);
-            // Karena `X` and `O` mempunyai warna masing-masing (merah dan hitam)
-            // Sebaiknya setiap langkah (baik `X` maupun `O`) ditandai dengan warnanya
-            // masing-masing
+            statusBar.setForeground(Color.WHITE);
             if (currentPlayer == Seed.CROSS) {
-                statusBar.setForeground(Color.BLACK);
-                statusBar.setText("X's Turn");
+                statusBar.setText(playerXName + "'s Turn (X)");
             } else {
-                statusBar.setForeground(Color.RED);
-                statusBar.setText("O's Turn");
+                statusBar.setText(playerOName + "'s Turn (O)");
             }
         } else if (currentState == State.DRAW) {
-            // Ubah warna merah menjadi warna kuning ketika remis.
             statusBar.setForeground(Color.YELLOW);
-            statusBar.setText("It's a Draw! Click to play again.");
-
-            // Pada kondisi remis. `restartButton` akan muncul pada bagian atas.
+            statusBar.setText("It's a Draw! Click 'Play Again'.");
             restartButton.setVisible(true);
         } else if (currentState == State.CROSS_WON) {
-            // Ubah warna text saat `X` menang yaitu warna hitam
-            statusBar.setForeground(Color.BLACK);
-            statusBar.setText("'X' Won! Click to play again.");
-
-            // Pada kondisi `X` menang, `restartButton` akan muncul pada bagian atas.
+            statusBar.setForeground(Color.GREEN);
+            statusBar.setText("'" + playerXName + "' Won! Click 'Play Again'.");
+            // Check if button is not visible, which means we just entered this state.
+            // This prevents the score from incrementing on every repaint.
+            if (!restartButton.isVisible()) {
+                playerXScore++;
+                updateScoreLabel();
+            }
             restartButton.setVisible(true);
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again.");
-
-            // Pada kondisi `O` menang, `restartButton` akan muncul pada bagian atas.
+            statusBar.setForeground(Color.GREEN);
+            statusBar.setText("'" + playerOName + "' Won! Click 'Play Again'.");
+            // Same check to prevent multiple score increments.
+            if (!restartButton.isVisible()) {
+                playerOScore++;
+                updateScoreLabel();
+            }
             restartButton.setVisible(true);
         }
     }
@@ -158,9 +179,20 @@ public class GameMain extends JPanel {
         // Run GUI construction codes in Event-Dispatching thread for thread safety
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                // Prompt for player names
+                String playerX = JOptionPane.showInputDialog(null, "Enter Player X's Name:", "Player X", JOptionPane.QUESTION_MESSAGE);
+                if (playerX == null || playerX.trim().isEmpty()) {
+                    playerX = "Player X"; // Default name if empty or cancelled
+                }
+
+                String playerO = JOptionPane.showInputDialog(null, "Enter Player O's Name:", "Player O", JOptionPane.QUESTION_MESSAGE);
+                if (playerO == null || playerO.trim().isEmpty()) {
+                    playerO = "Player O"; // Default name if empty or cancelled
+                }
+
                 JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
-                frame.setContentPane(new GameMain());
+                // Pass player names to the GameMain constructor
+                frame.setContentPane(new GameMain(playerX, playerO));
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
                 frame.setLocationRelativeTo(null); // center the application window
