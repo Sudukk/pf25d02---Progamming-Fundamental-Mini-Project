@@ -14,7 +14,7 @@ public class GameMain extends JPanel {
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
     public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
     public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
-    public static final Font FONT_STATUS = new Font("Segoe UI", Font.PLAIN, 14);
+    public static final Font FONT_STATUS = new Font("Segoe UI", Font.BOLD, 14);
 
     // Define game objects
     private Board board;         // the game board
@@ -75,14 +75,13 @@ public class GameMain extends JPanel {
         super.setLayout(new BorderLayout());
         super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
         super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        // account for statusBar in height
         super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
 
-        // --- UI for Score and Restart Button ---
+        // UI buat bagian atas
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(COLOR_BG);
 
-        // Score Label Setup
+        // Buat skor bagian atas
         scoreLabel = new JLabel();
         scoreLabel.setFont(FONT_STATUS);
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -133,7 +132,7 @@ public class GameMain extends JPanel {
             statusBar.setText("It's a Draw! Click to play again.");
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'" + playerXName + "' Won! Click 'Play Again'.");
+            statusBar.setText("'" + playerXName + "' Won! Click anywhere to play again.");
 
             playerXScore++;
             updateScoreLabel();
@@ -141,7 +140,7 @@ public class GameMain extends JPanel {
             SoundEffect.EXPLODE.play();
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'" + playerOName + "' Won! Click 'Play Again'.");
+            statusBar.setText("'" + playerOName + "' Won! Click anywhere to play again.");
 
             playerOScore++;
             updateScoreLabel();
