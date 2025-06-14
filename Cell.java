@@ -1,39 +1,51 @@
 import java.awt.*;
-/**
- * The Cell class models each individual cell of the game board.
- */
-public class Cell {
-    // Define named constants for drawing
-    public static final int SIZE = 120; // cell width/height (square)
-    // Symbols (cross/nought) are displayed inside a cell, with padding from border
-    public static final int PADDING = SIZE / 5;
-    public static final int SEED_SIZE = SIZE - PADDING * 2;
+import javax.swing.*;
 
-    // Define properties (package-visible)
-    /** Content of this cell (Seed.EMPTY, Seed.CROSS, or Seed.NOUGHT) */
-    Seed content;
-    /** Row and column of this cell */
-    int row, col;
+public class Cell extends JPanel {
+    int row;
+    int col;
+    int size;
+    CellContent content;
 
-    /** Constructor to initialize this cell with the specified row and col */
-    public Cell(int row, int col) {
-        this.row = row;
-        this.col = col;
-        content = Seed.NO_SEED;
+    public Cell(int row, int col, int size) {
+        this.content = CellContent.NONE;
+        this.size = size;
+        setSize(size, size);
+        setBackground(Color.white);
+        setBorder(BorderFactory.createLineBorder(Color.black));
     }
 
-    /** Reset this cell's content to EMPTY, ready for new game */
-    public void newGame() {
-        content = Seed.NO_SEED;
+    public void clearContent() {
+        this.content = CellContent.NONE;
     }
 
-    /** Paint itself on the graphics canvas, given the Graphics context */
-    public void paint(Graphics g) {
-        // Draw the Seed if it is not empty
-        int x1 = col * SIZE + PADDING;
-        int y1 = row * SIZE + PADDING;
-        if (content == Seed.CROSS || content == Seed.NOUGHT) {
-            g.drawImage(content.getImage(), x1, y1, SEED_SIZE, SEED_SIZE, null);
+    public int getCellSize() {
+        return this.size;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D gtwod = (Graphics2D) g;
+        gtwod.setStroke(new BasicStroke(5));
+
+        int padx = getWidth() / 10;
+        int pady = getHeight() / 10;
+
+        if (content == CellContent.CROSS) {
+            gtwod.setColor(Color.black);
+            int xone = row + padx;
+            int yone = col + pady;
+            int xtwo = row + (getWidth() - padx);
+            int ytwo = col + (getHeight() - pady);
+            gtwod.drawLine(xone, yone, xtwo, ytwo);
+            gtwod.drawLine(xone, ytwo, xtwo, yone);
+        } else if (content == CellContent.NOUGHT) {
+            gtwod.setColor(Color.red);
+            int xone = row * (getWidth() / 2) + padx;
+            int yone = col * (getHeight() / 2) + pady;
+            gtwod.drawOval(xone, yone, size, size);
         }
     }
 }
