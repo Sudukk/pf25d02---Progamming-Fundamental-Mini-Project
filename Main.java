@@ -3,18 +3,17 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
+        // empty
         // outer window
         JFrame frame = new JFrame("Tic Tac Toe");
-        // frame.setBackground(new Color(76, 143, 112));
 
         // initialize outer window
-        frame.setSize(400, 500);
+        frame.setSize(500, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        frame.add(new Board(3, 3), BorderLayout.CENTER);
+        frame.add(new Board(3, 3));
         frame.setVisible(true);
-
     }
     // public static void tmp() {
     // // outer window
