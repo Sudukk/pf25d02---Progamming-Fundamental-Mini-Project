@@ -173,6 +173,7 @@ public class GameMain extends JPanel {
 //                frame.setVisible(true);            // show it
 //            }
 //        });
+
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame(TITLE);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

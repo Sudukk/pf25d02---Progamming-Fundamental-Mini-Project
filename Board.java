@@ -82,6 +82,41 @@ public class Board {
         }
     }
 
+    /**
+     * Check the game state after the given player moves at (selectedRow, selectedCol).
+     * Does NOT modify the board state.
+     */
+    public State checkGameState(Seed player, int selectedRow, int selectedCol) {
+        // Check for win
+        if (cells[selectedRow][0].content == player
+                && cells[selectedRow][1].content == player
+                && cells[selectedRow][2].content == player
+                || cells[0][selectedCol].content == player
+                && cells[1][selectedCol].content == player
+                && cells[2][selectedCol].content == player
+                || selectedRow == selectedCol
+                && cells[0][0].content == player
+                && cells[1][1].content == player
+                && cells[2][2].content == player
+                || selectedRow + selectedCol == 2
+                && cells[0][2].content == player
+                && cells[1][1].content == player
+                && cells[2][0].content == player) {
+            return (player == Seed.CROSS) ? State.CROSS_WON : State.NOUGHT_WON;
+        }
+
+        // Check for draw
+        for (int row = 0; row < ROWS; ++row) {
+            for (int col = 0; col < COLS; ++col) {
+                if (cells[row][col].content == Seed.NO_SEED) {
+                    return State.PLAYING;
+                }
+            }
+        }
+        return State.DRAW;
+    }
+
+
     /** Paint itself on the graphics canvas, given the Graphics context */
     public void paint(Graphics g) {
         // Draw the grid-lines
