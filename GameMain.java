@@ -152,26 +152,35 @@ public class GameMain extends JPanel {
     /** The entry "main" method */
     public static void main(String[] args) {
         // Run GUI construction codes in Event-Dispatching thread for thread safety
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                String playerX = JOptionPane.showInputDialog(null, "Masukkan nama player X:", "Player X", JOptionPane.QUESTION_MESSAGE);
-                if (playerX == null || playerX.trim().isEmpty()) {
-                    playerX = "Player X";
-                }
-
-                String playerO = JOptionPane.showInputDialog(null, "Masukkan nama player O:", "Player O", JOptionPane.QUESTION_MESSAGE);
-                if (playerO == null || playerO.trim().isEmpty()) {
-                    playerO = "Player O";
-                }
-
-                JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
-                frame.setContentPane(new GameMain(playerX,playerO));
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null); // center the application window
-                frame.setVisible(true);            // show it
-            }
+//        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+//            public void run() {
+//                String playerX = JOptionPane.showInputDialog(null, "Masukkan nama player X:", "Player X", JOptionPane.QUESTION_MESSAGE);
+//                if (playerX == null || playerX.trim().isEmpty()) {
+//                    playerX = "Player X";
+//                }
+//
+//                String playerO = JOptionPane.showInputDialog(null, "Masukkan nama player O:", "Player O", JOptionPane.QUESTION_MESSAGE);
+//                if (playerO == null || playerO.trim().isEmpty()) {
+//                    playerO = "Player O";
+//                }
+//
+//                JFrame frame = new JFrame(TITLE);
+//                // Set the content-pane of the JFrame to an instance of main JPanel
+//                frame.setContentPane(new GameMain(playerX,playerO));
+//                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//                frame.pack();
+//                frame.setLocationRelativeTo(null); // center the application window
+//                frame.setVisible(true);            // show it
+//            }
+//        });
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame(TITLE);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setContentPane(new StartMenu(frame));
+            frame.pack();
+            frame.setSize(400, 400);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         });
     }
 }
