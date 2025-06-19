@@ -1,7 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.*;
-import java.util.*;
 import javax.swing.*;
 import java.util.List;
 import javax.swing.Timer;
@@ -33,15 +31,15 @@ public class MultiplayerGameMain extends JPanel {
             System.out.println("Created new game with ID: " + gameId);
             localPlayer = "Player X";
         } else {
-            gameId = this.dbManager.getLatestGameId(); // or handle multi-game logic as needed
+            gameId = this.dbManager.getLatestGameId();
             localPlayer = "Player O";
         }
-        this.gameContext = new MultiplayerGameContext(gameId);// Initialize context with game ID 1
+        this.gameContext = new MultiplayerGameContext(gameId);
 
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Sync before accepting input
+                // Sync dengan DB
                 syncBoardFromDB();
 
                 int mouseX = e.getX();
@@ -58,7 +56,7 @@ public class MultiplayerGameMain extends JPanel {
                     return;
                 }
 
-                // Only allow local player to move if it's their turn
+                // cuma player lokal yg bisa gerak kalo itu giliranya
                 String local = getLocalPlayer();
                 Seed currentTurn = gameContext.getCurrentPlayer();
                 boolean isLocalPlayersTurn = (currentTurn == Seed.CROSS && "Player X".equals(local)) ||
@@ -115,7 +113,7 @@ public class MultiplayerGameMain extends JPanel {
         newGame();
         updateScoreLabel();
 
-        // Periodic sync with DB every 1 second
+        // sync dengan DB per 200ms
         new Timer(200, e -> syncBoardFromDB()).start();
     }
 
@@ -126,7 +124,7 @@ public class MultiplayerGameMain extends JPanel {
     public void initGame() {
         board = new Board();
 
-        // Sync the board with DB on game start
+        // sync dengan DB pas inisiasi
         List<Move> moves = dbManager.getMoves(gameContext.getGameId());
         lastSyncedMoveNumber = moves.size();
         for (Move move : moves) {
@@ -191,7 +189,6 @@ public class MultiplayerGameMain extends JPanel {
     private void syncBoardFromDB() {
         List<Move> moves = dbManager.getMoves(gameContext.getGameId());
 
-        // ✅ Fix: Detect reset only when DB is empty and we previously had moves
         if (moves.isEmpty() && lastSyncedMoveNumber > 0) {
             System.out.println("Detected game reset from DB. Clearing local board.");
             board.newGame();
@@ -228,10 +225,10 @@ public class MultiplayerGameMain extends JPanel {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame(MultiplayerGameMain.TITLE);
-            MultiplayerGameMain gamePanel = new MultiplayerGameMain();  // ✅ create the gamePanel
+            MultiplayerGameMain gamePanel = new MultiplayerGameMain();
 
             frame.setContentPane(gamePanel);
-            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // prevent default exit
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
             frame.addWindowListener(new WindowAdapter() {
                 @Override

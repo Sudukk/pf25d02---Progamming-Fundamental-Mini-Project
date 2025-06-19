@@ -25,7 +25,6 @@ public class DBManager {
         }
     }
 
-    // CREATE
     public void insertMove(int gameId, char player, int row, int col, int moveNumber) {
         String sql = "INSERT INTO moves (game_id, player, `row`, `col`, move_number) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DriverManager.getConnection(jdbcUrl, userName, password);
@@ -84,7 +83,7 @@ public class DBManager {
 
             ResultSet rs = pstmt.getGeneratedKeys();
             if (rs.next()) {
-                return rs.getInt(1); // return new game ID
+                return rs.getInt(1);
             }
 
         } catch (SQLException e) {
@@ -137,6 +136,4 @@ public class DBManager {
         }
         return latestGameId;
     }
-
-
 }
