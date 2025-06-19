@@ -173,14 +173,16 @@ public class GameMain extends JPanel {
 //                frame.setVisible(true);            // show it
 //            }
 //        });
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame(TITLE);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setContentPane(new StartMenu(frame));
-            frame.pack();
-            frame.setSize(400, 400);
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
+
+
+//        SwingUtilities.invokeLater(() -> {
+//            JFrame frame = new JFrame(TITLE);
+//            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//            frame.setContentPane(new StartMenu(frame));
+//            frame.pack();
+//            frame.setSize(400, 400);
+//            frame.setLocationRelativeTo(null);
+//            frame.setVisible(true);
+//        });
     }
 }
