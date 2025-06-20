@@ -147,6 +147,8 @@ public class StartMenu extends JPanel {
     private void startBotGame(JFrame frame) {
         frame.setContentPane(new GameBotMain("Player X"));
         frame.setSize(400,400);
+
+        frame.pack();
         frame.setResizable(false);
         frame.revalidate();
         frame.repaint();
