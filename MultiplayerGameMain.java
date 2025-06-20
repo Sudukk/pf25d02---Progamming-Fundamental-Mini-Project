@@ -24,18 +24,25 @@ public class MultiplayerGameMain extends JPanel {
     private String localPlayer;
     private BoardPanel boardPanel;
     private Timer syncTimer;
+    private String playerName;
+    private boolean isHost;
+    private String oppName;
 
-    public MultiplayerGameMain() {
+    public MultiplayerGameMain(String playerName) {
         this.dbManager = new DBManager();
-
-
         int gameId;
+        oppName = "";
         if (dbManager.isGamesTableEmpty()) {
-            gameId = dbManager.createNewGame("Player X", "Player O");
             localPlayer = "Player X";
+            this.isHost = true;
+            this.playerName = playerName;
+            gameId = dbManager.createNewGame(this.playerName, this.isHost);
         } else {
             gameId = this.dbManager.getLatestGameId();
             localPlayer = "Player O";
+            this.isHost = false;
+            this.playerName = playerName;
+            dbManager.insertOppName(gameId, this.playerName);
         }
         this.gameContext = new MultiplayerGameContext(gameId);
 
@@ -214,7 +221,7 @@ public class MultiplayerGameMain extends JPanel {
     }
 
     private void updateScoreLabel() {
-        scoreLabel.setText("Player X: " + gameContext.getPlayerXScore() + "   |   Player O: " + gameContext.getPlayerOScore());
+        scoreLabel.setText(this.playerName + ": " + gameContext.getPlayerXScore() + "   |   " + this.oppName + ": " + gameContext.getPlayerOScore());
     }
 
     public void initGame() {
@@ -272,6 +279,8 @@ public class MultiplayerGameMain extends JPanel {
 
     private void syncBoardFromDB() {
         List<Move> moves = dbManager.getMoves(gameContext.getGameId());
+        String oppName = dbManager.getOppName(this.isHost);
+        this.oppName = oppName;
 
         if (moves.isEmpty() && lastSyncedMoveNumber > 0) {
             board.newGame();
@@ -305,34 +314,8 @@ public class MultiplayerGameMain extends JPanel {
         dbManager.deleteGame(gameContext.getGameId());
     }
 
-    private String getLocalPlayer() {
-        return localPlayer;
-    }
-
     private void setCurrentPlayer(String player) {
         gameContext.setCurrentPlayer("Player X".equals(player) ? Seed.CROSS : Seed.NOUGHT);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame(TITLE);
-            MultiplayerGameMain gamePanel = new MultiplayerGameMain();
-
-            frame.setContentPane(gamePanel);
-            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    gamePanel.deleteGame();
-                    System.exit(0);
-                }
-            });
-
-            frame.pack();
-            frame.setResizable(false);
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
     }
 
     private class BoardPanel extends JPanel {

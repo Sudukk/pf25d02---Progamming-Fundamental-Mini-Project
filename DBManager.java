@@ -72,13 +72,18 @@ public class DBManager {
         }
     }
 
-    public int createNewGame(String playerX, String playerO) {
-        String sql = "INSERT INTO games (player_x, player_o) VALUES (?, ?)";
+    public int createNewGame(String playerName, boolean isHost) {
+        String sql = "";
+        if(isHost){
+            sql = "INSERT INTO games (player_x) VALUES (?)";
+        }else{
+            sql = "INSERT INTO games (player_o) VALUES (?)";
+        }
+
         try (Connection conn = DriverManager.getConnection(jdbcUrl, userName, password);
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setString(1, playerX);
-            pstmt.setString(2, playerO);
+            pstmt.setString(1, playerName);
             pstmt.executeUpdate();
 
             ResultSet rs = pstmt.getGeneratedKeys();
@@ -90,6 +95,40 @@ public class DBManager {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public void insertOppName(int gameId, String oppName) {
+        String sql = "UPDATE games SET player_o = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, userName, password);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, oppName);
+            stmt.setInt(2, gameId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getOppName(boolean isHost) {
+        String sql ="";
+
+        if (isHost){
+            sql = "SELECT player_o FROM games";
+        }else{
+            sql = "SELECT player_x FROM games";
+        }
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, userName, password);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Player Error";
     }
 
     public boolean isGamesTableEmpty() {
