@@ -9,7 +9,7 @@ public class StartMenu extends JPanel {
     public StartMenu(JFrame frame) {
 
         setLayout(new BorderLayout());
-        setBackground(new Color(2,21,38)); // Warna biru toska terang
+        setBackground(GameConstants.COLOR_BG); // Warna biru toska terang
 
         // Panel tengah untuk tombol dan logo
         JPanel centerPanel = new JPanel();
@@ -119,7 +119,7 @@ public class StartMenu extends JPanel {
         button.setAlignmentY(10);
         button.setFont(new Font("SegoeUI", Font.BOLD, 20));
         button.setMaximumSize(new Dimension(240, 50));
-        button.setBackground(color);
+        button.setBackground(GameConstants.COLOR_BG);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
 
@@ -129,19 +129,48 @@ public class StartMenu extends JPanel {
     }
 
     private void startDuoGame(JFrame frame) {
-        String playerX = JOptionPane.showInputDialog(frame, "Enter name for Player X:", "Player X", JOptionPane.QUESTION_MESSAGE);
-        if (playerX == null || playerX.trim().isEmpty()) playerX = "Player X";
+        JTextField playerXField = new JTextField("Player X", 15);
+        JTextField playerOField = new JTextField("Player O", 15);
 
-        String playerO = JOptionPane.showInputDialog(frame, "Enter name for Player O:", "Player O", JOptionPane.QUESTION_MESSAGE);
-        if (playerO == null || playerO.trim().isEmpty()) playerO = "Player O";
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.add(new JLabel("Enter name for Player X:"));
+        panel.add(playerXField);
+        panel.add(new JLabel("Enter name for Player O:"));
+        panel.add(playerOField);
 
-        frame.setContentPane(new GameMain(playerX, playerO));
-        frame.setSize(400,400);
+        int result = JOptionPane.showConfirmDialog(
+                frame,
+                panel,
+                "Enter Player Names",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
 
-        frame.pack();
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        String playerX = "Player X";
+        String playerO = "Player O";
+
+        if (result == JOptionPane.OK_OPTION) {
+            String inputX = playerXField.getText().trim();
+            String inputO = playerOField.getText().trim();
+
+            if (!inputX.isEmpty()) playerX = inputX;
+            if (!inputO.isEmpty()) playerO = inputO;
+
+            frame.setContentPane(new GameMain(playerX, playerO));
+            frame.setSize(400,400);
+
+            frame.pack();
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+
+        }else{
+            frame.setContentPane(new StartMenu(frame));
+            frame.revalidate();
+            frame.repaint();
+        }
+
+
     }
 
     private void startBotGame(JFrame frame) {
@@ -162,24 +191,49 @@ public class StartMenu extends JPanel {
     }
 
     private void startMultiplayerGame(JFrame frame) {
-        String playerName = JOptionPane.showInputDialog(frame, "Enter your username:", "Player X", JOptionPane.QUESTION_MESSAGE);
-        if (playerName == null || playerName.trim().isEmpty()) playerName = "Unnamed Player";
+        JTextField usernameField = new JTextField(15);
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.add(new JLabel("Enter your username:"), BorderLayout.NORTH);
+        panel.add(usernameField, BorderLayout.CENTER);
 
-        MultiplayerGameMain gamePanel = new MultiplayerGameMain(playerName);
-        frame.setContentPane(gamePanel);
-        frame.setSize(400,400);
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                gamePanel.deleteGame();
-                System.exit(0);
+        int result = JOptionPane.showConfirmDialog(
+                frame,
+                panel,
+                "Username",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+        );
+
+        String playerName;
+        if (result == JOptionPane.OK_OPTION) {
+            playerName = usernameField.getText().trim();
+            if (playerName.isEmpty()) {
+                playerName = "Player X"; // fallback if empty
             }
-        });
 
-        frame.pack();
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+            MultiplayerGameMain gamePanel = new MultiplayerGameMain(playerName);
+            frame.setContentPane(gamePanel);
+            frame.setSize(400,400);
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    gamePanel.deleteGame();
+                    System.exit(0);
+                }
+            });
+
+            frame.pack();
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+
+        } else {
+            frame.setContentPane(new StartMenu(frame));
+            frame.revalidate();
+            frame.repaint();
+        }
+
+
     }
 }

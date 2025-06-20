@@ -99,7 +99,7 @@ public class MultiplayerGameMain extends JPanel {
         newGame();
         updateScoreLabel();
 
-        this.syncTimer = new Timer(50, e -> syncBoardFromDB());
+        this.syncTimer = new Timer(1000, e -> syncBoardFromDB());
         this.syncTimer.start();
 
     }
