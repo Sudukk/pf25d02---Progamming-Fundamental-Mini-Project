@@ -23,6 +23,7 @@ public class MultiplayerGameMain extends JPanel {
     private int lastSyncedMoveNumber = 0;
     private String localPlayer;
     private BoardPanel boardPanel;
+    private Timer syncTimer;
 
     public MultiplayerGameMain() {
         this.dbManager = new DBManager();
@@ -91,7 +92,9 @@ public class MultiplayerGameMain extends JPanel {
         newGame();
         updateScoreLabel();
 
-        new Timer(50, e -> syncBoardFromDB()).start();
+        this.syncTimer = new Timer(50, e -> syncBoardFromDB());
+        this.syncTimer.start();
+
     }
 
     private void setupUI() {
@@ -139,7 +142,16 @@ public class MultiplayerGameMain extends JPanel {
         backButton.setBackground(new Color(230, 230, 230));
         backButton.addActionListener(e -> {
             deleteGame(); // Optional: clean up game state
-            new StartMenu(new JFrame());  // Implement this method
+
+            if (this.syncTimer != null) {
+                this.syncTimer.stop(); // Important!
+            }
+
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            topFrame.getContentPane().removeAll();
+            topFrame.getContentPane().add(new StartMenu(topFrame));
+            topFrame.revalidate();
+            topFrame.repaint();
         });
 
         statusPanel.add(statusBar, BorderLayout.CENTER);
