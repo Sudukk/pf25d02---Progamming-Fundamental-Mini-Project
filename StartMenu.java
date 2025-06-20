@@ -137,9 +137,11 @@ public class StartMenu extends JPanel {
 
         frame.setContentPane(new GameMain(playerX, playerO));
         frame.setSize(400,400);
+
+        frame.pack();
         frame.setResizable(false);
-        frame.revalidate();
-        frame.repaint();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     private void startBotGame(JFrame frame) {
@@ -151,7 +153,7 @@ public class StartMenu extends JPanel {
     }
 
     private void startSettingsMenu(JFrame frame) {
-        frame.setContentPane(new SettingsMenu());
+        frame.setContentPane(new SettingsMenu(frame));
         frame.revalidate(); // refresh UI
         frame.repaint();
 

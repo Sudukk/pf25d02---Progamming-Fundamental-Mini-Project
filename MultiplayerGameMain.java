@@ -94,8 +94,8 @@ public class MultiplayerGameMain extends JPanel {
             }
         });
 
-        setupUI();
         initGame();
+        setupUI();
         newGame();
         updateScoreLabel();
 
@@ -157,6 +157,7 @@ public class MultiplayerGameMain extends JPanel {
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             topFrame.getContentPane().removeAll();
             topFrame.getContentPane().add(new StartMenu(topFrame));
+            topFrame.setSize(720,800);
             topFrame.revalidate();
             topFrame.repaint();
         });
@@ -164,7 +165,7 @@ public class MultiplayerGameMain extends JPanel {
         statusPanel.add(statusBar, BorderLayout.CENTER);
         statusPanel.add(backButton, BorderLayout.EAST);
 
-        boardPanel = new BoardPanel();
+        boardPanel = new BoardPanel(this.board);
         boardPanel.setBackground(COLOR_BG);
         boardPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -326,19 +327,5 @@ public class MultiplayerGameMain extends JPanel {
     private void setCurrentPlayer(String player) {
         gameContext.setCurrentPlayer("Player X".equals(player) ? Seed.CROSS : Seed.NOUGHT);
     }
-
-    private class BoardPanel extends JPanel {
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            board.paint(g);
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT);
-        }
-    }
-
 }
 

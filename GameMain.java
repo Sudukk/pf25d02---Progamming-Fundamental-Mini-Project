@@ -1,152 +1,180 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
 /**
  * Tic-Tac-Toe: Two-player Graphic version with better OO design.
  * The Board and Cell classes are separated in their own classes.
  */
 public class GameMain extends JPanel {
-    private static final long serialVersionUID = 1L; // to prevent serializable warning
+    private static final long serialVersionUID = 1L;
 
-    // Define named constants for the drawing graphics
     public static final String TITLE = "Tic Tac Toe";
-    public static final Color COLOR_BG = Color.BLUE;
-    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
-    public static final Font FONT_STATUS = new Font("Segoe UI", Font.BOLD, 14);
+    public static final Color COLOR_BG = new Color(25, 25, 45);
+    public static final Color COLOR_BG_STATUS = new Color(245, 245, 250);
+    public static final Color COLOR_CROSS = new Color(239, 105, 80);
+    public static final Color COLOR_NOUGHT = new Color(64, 154, 225);
+    public static final Font FONT_STATUS = new Font("Segoe UI", Font.PLAIN, 14);
+    public static final Font FONT_SCORE = new Font("Segoe UI Semibold", Font.BOLD, 16);
 
-    // Define game objects
-    private Board board;         // the game board
-    private State currentState;  // the current state of the game
-    private Seed currentPlayer;  // the current player
-    private JLabel statusBar;    // for displaying status message
+    private Board board;
+    private State currentState;
+    private Seed currentPlayer;
+    private JLabel statusBar;
+    private JLabel scoreLabel;
 
-    //nama dan skor
     private String playerXName;
     private String playerOName;
-    private int playerXScore;
-    private int playerOScore;
-    private JLabel scoreLabel;
-    /** Constructor to setup the UI and game components */
-    public GameMain(String playerXName, String playerOName) {
+    private int playerXScore = 0;
+    private int playerOScore = 0;
 
+    private BoardPanel boardPanel;
+
+    public GameMain(String playerXName, String playerOName) {
         this.playerXName = playerXName;
         this.playerOName = playerOName;
-        this.playerXScore = 0;
-        this.playerOScore = 0;
-        SoundEffect.masterVolume = SoundEffect.Volume.LOW;
-        // This JPanel fires MouseEvent
-        super.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
 
-                SoundEffect.EAT_FOOD.play();
+
+        initGame();
+        setupUI();
+        newGame();
+        updateScoreLabel();
+        updateStatusBar();
+    }
+
+    private void setupUI() {
+        setLayout(new BorderLayout(0, 0));
+
+        setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 70));
+        setBackground(COLOR_BG);
+        setBorder(BorderFactory.createLineBorder(new Color(100, 100, 130), 3));
+
+        // Top Score Panel
+        scoreLabel = new JLabel();
+        scoreLabel.setFont(FONT_SCORE);
+        scoreLabel.setForeground(new Color(240, 240, 255));
+        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        scoreLabel.setOpaque(false);
+
+        JPanel topPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setPaint(new GradientPaint(0, 0, new Color(40, 40, 70), getWidth(), getHeight(), new Color(30, 30, 50)));
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        topPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 45));
+        topPanel.add(scoreLabel, BorderLayout.CENTER);
+
+        // Status Bar
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setBackground(COLOR_BG_STATUS);
+        statusPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 30));
+
+        statusBar = new JLabel();
+        statusBar.setFont(FONT_STATUS);
+        statusBar.setForeground(Color.DARK_GRAY);
+        statusBar.setOpaque(false);
+        statusBar.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        statusBar.setHorizontalAlignment(SwingConstants.LEFT);
+
+        statusPanel.add(statusBar, BorderLayout.CENTER);
+
+        // Game board
+        boardPanel = new BoardPanel(this.board);
+        boardPanel.setBackground(COLOR_BG);
+        boardPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 int mouseX = e.getX();
                 int mouseY = e.getY();
-                // Get the row and column clicked
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
 
-                if (currentState == State.PLAYING) {
-                    if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
-                            && board.cells[row][col].content == Seed.NO_SEED) {
-                        // Update cells[][] and return the new game state after the move
-                        currentState = board.stepGame(currentPlayer, row, col);
-                        // Switch player
-                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-                    }
-                } else {        // game over
-                    newGame();  // restart the game
+                if (row < 0 || row >= Board.ROWS || col < 0 || col >= Board.COLS) return;
+
+                if (currentState != State.PLAYING) {
+                    newGame();
+                    updateStatusBar();
+                    boardPanel.repaint();
+                    return;
                 }
-                // Refresh the drawing canvas
-                repaint();  // Callback paintComponent().
+
+                if (board.cells[row][col].content == Seed.NO_SEED) {
+                    currentState = board.stepGame(currentPlayer, row, col);
+                    if (currentState == State.CROSS_WON) playerXScore++;
+                    else if (currentState == State.NOUGHT_WON) playerOScore++;
+
+                    currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+                    updateScoreLabel();
+                    updateStatusBar();
+                    boardPanel.repaint();
+                }
             }
         });
 
-        // Setup the status bar (JLabel) to display status message
-        statusBar = new JLabel();
-        statusBar.setFont(FONT_STATUS);
-        statusBar.setBackground(COLOR_BG_STATUS);
-        statusBar.setOpaque(true);
-        statusBar.setPreferredSize(new Dimension(300, 30));
-        statusBar.setHorizontalAlignment(JLabel.LEFT);
-        statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
-
-        super.setLayout(new BorderLayout());
-        super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
-
-        // UI buat bagian atas
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(COLOR_BG);
-
-        // Buat skor bagian atas
-        scoreLabel = new JLabel();
-        scoreLabel.setFont(FONT_STATUS);
-        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        updateScoreLabel(); // Set initial score text
-        topPanel.add(scoreLabel, BorderLayout.CENTER);
-
-        super.add(topPanel, BorderLayout.PAGE_START);
-
-        // Set up Game
-        initGame();
-        newGame();
+        add(topPanel, BorderLayout.NORTH);
+        add(boardPanel, BorderLayout.CENTER);
+        add(statusPanel, BorderLayout.SOUTH);
     }
 
     private void updateScoreLabel() {
         scoreLabel.setText(playerXName + ": " + playerXScore + "   |   " + playerOName + ": " + playerOScore);
     }
 
-    /** Initialize the game (run once) */
-    public void initGame() {
-        board = new Board();  // allocate the game-board
+    private void updateStatusBar() {
+        if (statusBar == null) return;
+
+        switch (currentState) {
+            case PLAYING:
+                statusBar.setForeground(Color.DARK_GRAY);
+                statusBar.setText((currentPlayer == Seed.CROSS ? playerXName : playerOName) + "'s Turn");
+                break;
+            case DRAW:
+                statusBar.setForeground(new Color(200, 50, 50));
+                statusBar.setText("It's a Draw! Click anywhere to play again.");
+                break;
+            case CROSS_WON:
+                statusBar.setForeground(new Color(200, 50, 50));
+                statusBar.setText(playerXName + " Won! Click anywhere to play again.");
+                break;
+            case NOUGHT_WON:
+                statusBar.setForeground(new Color(200, 50, 50));
+                statusBar.setText(playerOName + " Won! Click anywhere to play again.");
+                break;
+        }
     }
 
-    /** Reset the game-board contents and the current-state, ready for new game */
+    public void initGame() {
+        this.board = new Board();
+    }
+
     public void newGame() {
         for (int row = 0; row < Board.ROWS; ++row) {
             for (int col = 0; col < Board.COLS; ++col) {
-                board.cells[row][col].content = Seed.NO_SEED; // all cells empty
+                this.board.cells[row][col].content = Seed.NO_SEED;
             }
         }
-        currentPlayer = Seed.CROSS;    // cross plays first
-        currentState = State.PLAYING;  // ready to play
+        currentPlayer = Seed.CROSS;
+        currentState = State.PLAYING;
     }
-
-    /** Custom painting codes on this JPanel */
-    @Override
-    public void paintComponent(Graphics g) {  // Callback via repaint()
-        super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
-
-        board.paint(g);  // ask the game board to paint itself
-
-        // Print status-bar message
-        if (currentState == State.PLAYING) {
-            statusBar.setForeground(Color.BLACK);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
-        } else if (currentState == State.DRAW) {
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.");
-        } else if (currentState == State.CROSS_WON) {
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("'" + playerXName + "' Won! Click anywhere to play again.");
-
-            playerXScore++;
-            updateScoreLabel();
-
-            SoundEffect.EXPLODE.play();
-        } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setForeground(Color.RED);
-            statusBar.setText("'" + playerOName + "' Won! Click anywhere to play again.");
-
-            playerOScore++;
-            updateScoreLabel();
-
-            SoundEffect.EXPLODE.play();
-        }
-    }
+//
+//    private class BoardPanel extends JPanel {
+//        @Override
+//        protected void paintComponent(Graphics g) {
+//            super.paintComponent(g);
+//            board.paint(g);
+//        }
+//
+//        @Override
+//        public Dimension getPreferredSize() {
+//            return new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT);
+//        }
+//    }
 }
+
+
+
+
