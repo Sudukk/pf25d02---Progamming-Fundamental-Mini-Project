@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.lang.reflect.Field;
+import java.io.File;
 import java.util.ArrayList;
 
 public class SettingsMenu extends JPanel {
@@ -90,13 +91,64 @@ public class SettingsMenu extends JPanel {
     }
 
     public class IconMenu extends JPanel {
-        JLabel XIcon;
+        JLabel XIconLabel;
         JButton XIconBtn;
-        JLabel OIcon;
+        JLabel OIconLabel;
         JButton OIconBtn;
+
+        public IconMenu() {
+            setLayout(new BorderLayout());
+
+            XIconBtn = new JButton("X's Icon: ");
+
+            OIconBtn = new JButton("O's Icon: ");
+
+            XIconBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // TODO Auto-generated method stub
+                    String path = getSelectedFilePath();
+                    String curr = XIconLabel.getText();
+                    curr = path;
+                    XIconLabel.setText(curr);
+                }
+            });
+
+            OIconBtn.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    // TODO Auto-generated method stub
+                    String path = getSelectedFilePath();
+                    String curr = OIconLabel.getText();
+                    curr = path;
+                    OIconLabel.setText(curr);
+
+                }
+            });
+
+            add(XIconBtn, BorderLayout.WEST);
+            add(OIconBtn, BorderLayout.EAST);
+        }
+
+        private String getSelectedFilePath() {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("choose");
+            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+            chooser.setAcceptAllFileFilterUsed(true);
+            chooser.addChoosableFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("jpg", "png"));
+
+            int result = chooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = chooser.getSelectedFile();
+                return selectedFile.getPath();
+            }
+            return "";
+        }
     }
 
     JLabel settingsTitle;
+    JPanel menus;
     JButton backBtn;
 
     public SettingsMenu() {
@@ -115,15 +167,18 @@ public class SettingsMenu extends JPanel {
         });
 
         VolumesMenu volumes = new VolumesMenu();
+        UIMenu uimenu = new UIMenu();
+        IconMenu iconmenu = new IconMenu();
 
-        // add(settingsTitle, BorderLayout.NORTH);
-        // add(volumes, BorderLayout.CENTER);
-        // add(backBtn, BorderLayout.SOUTH);
+        menus = new JPanel();
+        menus.setLayout(new BorderLayout());
+        menus.add(volumes, BorderLayout.NORTH);
+        menus.add(uimenu, BorderLayout.CENTER);
+        menus.add(iconmenu, BorderLayout.SOUTH);
 
-        add(settingsTitle);
-        add(volumes);
-        add(backBtn);
-
+        add(settingsTitle, BorderLayout.NORTH);
+        add(menus, BorderLayout.CENTER);
+        add(backBtn, BorderLayout.SOUTH);
     }
 
     private String[] getAvailableColors() {
