@@ -7,9 +7,6 @@ import java.util.ArrayList;
 
 public class SettingsMenu extends JPanel {
     public class VolumesMenu extends JPanel {
-        JLabel masterSFXLable;
-        JSlider masterSFX;
-
         JLabel SFXVolumeLable;
         JSlider SFXVolume;
 
@@ -20,29 +17,30 @@ public class SettingsMenu extends JPanel {
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             add(Box.createRigidArea(new Dimension(0, 15)));
 
-            masterSFXLable = new JLabel("Master SFX: ");
-            masterSFX = new JSlider(0, 100);
-            masterSFX.setMajorTickSpacing(25);
-            masterSFX.setMinorTickSpacing(5);
-            masterSFX.setPaintTicks(true);
-            masterSFX.setPaintLabels(true);
-
             SFXVolumeLable = new JLabel("SFX Volume: ");
             SFXVolume = new JSlider(0, 100);
             SFXVolume.setMajorTickSpacing(25);
             SFXVolume.setMinorTickSpacing(5);
             SFXVolume.setPaintTicks(true);
             SFXVolume.setPaintLabels(true);
-
+            SFXVolume.setValue((int) SoundEffect.sfxVolume); // added
+            SFXVolume.addChangeListener(e -> {
+                SoundEffect.updateAllSFXVolume(SFXVolume.getValue());
+                System.out.println("SFX volume set to " + SoundEffect.sfxVolume);
+            });
             musicVolumeLable = new JLabel("Music Volume: ");
             musicVolume = new JSlider(0, 100);
             musicVolume.setMajorTickSpacing(25);
             musicVolume.setMinorTickSpacing(5);
             musicVolume.setPaintTicks(true);
             musicVolume.setPaintLabels(true);
+            musicVolume.setValue((int) SoundEffect.musicVolume); // added
+            musicVolume.addChangeListener(e -> {
+                SoundEffect.musicVolume = musicVolume.getValue();
+                System.out.println("Music volume set to " + SoundEffect.musicVolume);
+                SoundEffect.updateBGMusicVolume(musicVolume.getValue());
+            });
 
-            add(masterSFXLable);
-            add(masterSFX);
             add(Box.createRigidArea(new Dimension(0, 15)));
             add(SFXVolumeLable);
             add(SFXVolume);
@@ -51,6 +49,7 @@ public class SettingsMenu extends JPanel {
             add(musicVolume);
             add(Box.createRigidArea(new Dimension(0, 15)));
         }
+
     }
 
     public class UIMenu extends JPanel {
@@ -151,19 +150,17 @@ public class SettingsMenu extends JPanel {
     JPanel menus;
     JButton backBtn;
 
-    public SettingsMenu() {
+    public SettingsMenu(JFrame frame) {
         setLayout(new BorderLayout());
 
         settingsTitle = new JLabel("Option Menu", SwingConstants.CENTER);
         settingsTitle.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
 
         backBtn = new JButton("back to main menu");
-        backBtn.addMouseListener(new MouseAdapter() {
-            // TODO: go back to main menu
-            @Override
-            public void mouseClicked(MouseEvent e) {
-
-            }
+        backBtn.addActionListener(e -> {
+            frame.setContentPane(new StartMenu(frame));
+            frame.revalidate();
+            frame.repaint();
         });
 
         VolumesMenu volumes = new VolumesMenu();
