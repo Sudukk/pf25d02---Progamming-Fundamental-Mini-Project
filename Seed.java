@@ -1,4 +1,5 @@
 import java.awt.Image;
+import java.io.File;
 import java.net.URL;
 import javax.swing.ImageIcon;
 /**
@@ -39,6 +40,29 @@ public enum Seed {   // to save as "Seed.java"
             img = icon.getImage();
         }
     }
+
+    public void changeIcon(String imagePath) {
+        ImageIcon icon = null;
+
+        URL imgURL = getClass().getClassLoader().getResource(imagePath);
+        if (imgURL != null) {
+            icon = new ImageIcon(imgURL);
+        } else {
+            File file = new File(imagePath);
+            if (file.exists()) {
+                icon = new ImageIcon(imagePath); // absolute path
+            } else {
+                System.err.println("Couldn't find file: " + imagePath);
+            }
+        }
+
+        if (icon != null) {
+            img = icon.getImage();
+        } else {
+            System.err.println("Failed to load icon from: " + imagePath);
+        }
+    }
+
 
     // Public getters
     public String getDisplayName() {
