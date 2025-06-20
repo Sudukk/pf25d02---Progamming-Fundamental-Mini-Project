@@ -148,10 +148,10 @@ public class MultiplayerGameMain extends JPanel {
         backButton.setMargin(new Insets(2, 10, 2, 10));
         backButton.setBackground(new Color(230, 230, 230));
         backButton.addActionListener(e -> {
-            deleteGame(); // Optional: clean up game state
+            deleteGame();
 
             if (this.syncTimer != null) {
-                this.syncTimer.stop(); // Important!
+                this.syncTimer.stop();
             }
 
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
@@ -221,8 +221,17 @@ public class MultiplayerGameMain extends JPanel {
     }
 
     private void updateScoreLabel() {
-        scoreLabel.setText(this.playerName + ": " + gameContext.getPlayerXScore() + "   |   " + this.oppName + ": " + gameContext.getPlayerOScore());
+        String label;
+        if ("Player X".equals(localPlayer)) {
+            label = this.playerName + ": " + gameContext.getPlayerXScore() +
+                    "   |   " + this.oppName + ": " + gameContext.getPlayerOScore();
+        } else {
+            label = this.playerName + ": " + gameContext.getPlayerOScore() +
+                    "   |   " + this.oppName + ": " + gameContext.getPlayerXScore();
+        }
+        scoreLabel.setText(label);
     }
+
 
     public void initGame() {
         board = new Board();

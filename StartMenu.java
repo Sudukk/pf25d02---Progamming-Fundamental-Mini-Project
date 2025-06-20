@@ -7,6 +7,7 @@ public class StartMenu extends JPanel {
     private static final long serialVersionUID = 1L;
 
     public StartMenu(JFrame frame) {
+
         setLayout(new BorderLayout());
         setBackground(new Color(2,21,38)); // Warna biru toska terang
 
@@ -16,12 +17,17 @@ public class StartMenu extends JPanel {
         centerPanel.setOpaque(false);
 
         // Tambahkan logo Tic Tac Toe
-        URL logoURL = getClass().getResource("/images/logo_tictactoe.png");
+
+        URL logoURL = getClass().getClassLoader().getResource("images/tictactoe_logo.png");
         if (logoURL != null) {
-            JLabel logoLabel = new JLabel(new ImageIcon(logoURL));
+            ImageIcon originalLogo = new ImageIcon(logoURL);
+            Image scaledImage = originalLogo.getImage().getScaledInstance(640, 360, Image.SCALE_SMOOTH);
+            ImageIcon scaledLogoIcon = new ImageIcon(scaledImage);
+            JLabel logoLabel = new JLabel(scaledLogoIcon);
             logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             centerPanel.add(Box.createVerticalStrut(30));
             centerPanel.add(logoLabel);
+
         } else {
             System.err.println("Logo image not found!");
             JLabel fallback = new JLabel("Tic Tac Toe");
@@ -31,6 +37,22 @@ public class StartMenu extends JPanel {
             centerPanel.add(Box.createVerticalStrut(30));
             centerPanel.add(fallback);
         }
+
+//        URL logoURL = getClass().getResource("/images/tictactoe_logo.png");
+//        if (logoURL != null) {
+//            JLabel logoLabel = new JLabel(new ImageIcon(logoURL));
+//            logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//            centerPanel.add(Box.createVerticalStrut(30));
+//            centerPanel.add(logoLabel);
+//        } else {
+//            System.err.println("Logo image not found!");
+//            JLabel fallback = new JLabel("Tic Tac Toe");
+//            fallback.setFont(new Font("SegoeUI", Font.BOLD, 36));
+//            fallback.setForeground(Color.WHITE);
+//            fallback.setAlignmentX(Component.CENTER_ALIGNMENT);
+//            centerPanel.add(Box.createVerticalStrut(30));
+//            centerPanel.add(fallback);
+//        }
 
         centerPanel.add(Box.createVerticalStrut(40));
         centerPanel.add(createButton("Play Now!", new Color(2,21,38), () -> startDuoGame(frame)));
@@ -114,12 +136,16 @@ public class StartMenu extends JPanel {
         if (playerO == null || playerO.trim().isEmpty()) playerO = "Player O";
 
         frame.setContentPane(new GameMain(playerX, playerO));
+        frame.setSize(400,400);
+        frame.setResizable(false);
         frame.revalidate();
         frame.repaint();
     }
 
     private void startBotGame(JFrame frame) {
         frame.setContentPane(new GameBotMain("Player X"));
+        frame.setSize(400,400);
+        frame.setResizable(false);
         frame.revalidate();
         frame.repaint();
     }
@@ -130,6 +156,7 @@ public class StartMenu extends JPanel {
 
         MultiplayerGameMain gamePanel = new MultiplayerGameMain(playerName);
         frame.setContentPane(gamePanel);
+        frame.setSize(400,400);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             @Override
