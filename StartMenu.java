@@ -20,7 +20,7 @@ public class StartMenu extends JPanel {
         // Create buttons
         addButton(frame, "Play Duo", () -> startDuoGame(frame));
         addButton(frame, "Play with Bot", () -> JOptionPane.showMessageDialog(frame, "Bot mode not implemented yet."));
-        addButton(frame, "Play Multiplayer", () -> JOptionPane.showMessageDialog(frame, "Multiplayer not implemented yet."));
+        addButton(frame, "Play Multiplayer", () -> startMultiplayerGame(frame));
         addButton(frame, "Options", () -> JOptionPane.showMessageDialog(frame, "Options menu not implemented yet."));
         addButton(frame, "Exit Game", () -> System.exit(0));
     }
@@ -45,5 +45,25 @@ public class StartMenu extends JPanel {
         frame.setContentPane(new GameMain(playerX, playerO));
         frame.revalidate();  // refresh UI
         frame.repaint();
+    }
+
+    private void startMultiplayerGame(JFrame frame) {
+
+        MultiplayerGameMain gamePanel = new MultiplayerGameMain();
+        frame.setContentPane(gamePanel);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                gamePanel.deleteGame();
+                System.exit(0);
+            }
+        });
+
+        frame.pack();
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }

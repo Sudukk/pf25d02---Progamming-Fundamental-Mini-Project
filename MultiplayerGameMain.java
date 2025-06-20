@@ -8,11 +8,12 @@ public class MultiplayerGameMain extends JPanel {
     private static final long serialVersionUID = 1L;
 
     public static final String TITLE = "Tic Tac Toe";
-    public static final Color COLOR_BG = Color.BLUE;
-    public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225);
-    public static final Font FONT_STATUS = new Font("Segoe UI", Font.BOLD, 14);
+    public static final Color COLOR_BG = new Color(25, 25, 45);
+    public static final Color COLOR_BG_STATUS = new Color(245, 245, 250);
+    public static final Color COLOR_CROSS = new Color(255, 95, 85);
+    public static final Color COLOR_NOUGHT = new Color(85, 170, 255);
+    public static final Font FONT_STATUS = new Font("Segoe UI", Font.PLAIN, 14);
+    public static final Font FONT_SCORE = new Font("Segoe UI Semibold", Font.BOLD, 16);
 
     private Board board;
     private JLabel statusBar;
@@ -21,14 +22,15 @@ public class MultiplayerGameMain extends JPanel {
     private MultiplayerGameContext gameContext;
     private int lastSyncedMoveNumber = 0;
     private String localPlayer;
+    private BoardPanel boardPanel;
 
     public MultiplayerGameMain() {
         this.dbManager = new DBManager();
 
+
         int gameId;
         if (dbManager.isGamesTableEmpty()) {
             gameId = dbManager.createNewGame("Player X", "Player O");
-            System.out.println("Created new game with ID: " + gameId);
             localPlayer = "Player X";
         } else {
             gameId = this.dbManager.getLatestGameId();
@@ -36,10 +38,9 @@ public class MultiplayerGameMain extends JPanel {
         }
         this.gameContext = new MultiplayerGameContext(gameId);
 
-        super.addMouseListener(new MouseAdapter() {
+        addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Sync dengan DB
                 syncBoardFromDB();
 
                 int mouseX = e.getX();
@@ -56,11 +57,9 @@ public class MultiplayerGameMain extends JPanel {
                     return;
                 }
 
-                // cuma player lokal yg bisa gerak kalo itu giliranya
-                String local = getLocalPlayer();
-                Seed currentTurn = gameContext.getCurrentPlayer();
-                boolean isLocalPlayersTurn = (currentTurn == Seed.CROSS && "Player X".equals(local)) ||
-                        (currentTurn == Seed.NOUGHT && "Player O".equals(local));
+                boolean isLocalPlayersTurn =
+                        (gameContext.getCurrentPlayer() == Seed.CROSS && "Player X".equals(localPlayer)) ||
+                                (gameContext.getCurrentPlayer() == Seed.NOUGHT && "Player O".equals(localPlayer));
 
                 if (!isLocalPlayersTurn) {
                     statusBar.setText("Wait for your turn!");
@@ -68,12 +67,13 @@ public class MultiplayerGameMain extends JPanel {
                 }
 
                 if (board.cells[row][col].content == Seed.NO_SEED) {
-                    State newState = board.stepGame(currentTurn, row, col);
+                    State newState = board.stepGame(gameContext.getCurrentPlayer(), row, col);
                     gameContext.setCurrentState(newState);
 
-                    int moveNumber = lastSyncedMoveNumber + 1;
-                    dbManager.insertMove(gameContext.getGameId(), currentTurn == Seed.CROSS ? 'X' : 'O', row, col, moveNumber);
-                    lastSyncedMoveNumber = moveNumber;
+                    int moveNumber = ++lastSyncedMoveNumber;
+                    dbManager.insertMove(gameContext.getGameId(),
+                            gameContext.getCurrentPlayer() == Seed.CROSS ? 'X' : 'O',
+                            row, col, moveNumber);
 
                     if (newState == State.CROSS_WON) gameContext.incrementPlayerXScore();
                     else if (newState == State.NOUGHT_WON) gameContext.incrementPlayerOScore();
@@ -86,35 +86,119 @@ public class MultiplayerGameMain extends JPanel {
             }
         });
 
-        // UI setup
-        statusBar = new JLabel();
-        statusBar.setFont(FONT_STATUS);
-        statusBar.setBackground(COLOR_BG_STATUS);
-        statusBar.setOpaque(true);
-        statusBar.setPreferredSize(new Dimension(300, 30));
-        statusBar.setHorizontalAlignment(JLabel.LEFT);
-        statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
-
-        scoreLabel = new JLabel();
-        scoreLabel.setFont(FONT_STATUS);
-        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(COLOR_BG);
-        topPanel.add(scoreLabel, BorderLayout.CENTER);
-
-        super.setLayout(new BorderLayout());
-        super.add(topPanel, BorderLayout.PAGE_START);
-        super.add(statusBar, BorderLayout.PAGE_END);
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
-
+        setupUI();
         initGame();
         newGame();
         updateScoreLabel();
 
-        // sync dengan DB per 200ms
-        new Timer(200, e -> syncBoardFromDB()).start();
+        new Timer(50, e -> syncBoardFromDB()).start();
+    }
+
+    private void setupUI() {
+        setLayout(new BorderLayout(0,0));
+
+        setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 70));
+        setBackground(COLOR_BG);
+        setBorder(BorderFactory.createLineBorder(new Color(100, 100, 130), 3));
+
+        // Top Score Panel
+        scoreLabel = new JLabel();
+        scoreLabel.setFont(FONT_SCORE);
+        scoreLabel.setForeground(new Color(240, 240, 255));
+        scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        scoreLabel.setOpaque(false);
+
+        JPanel topPanel = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setPaint(new GradientPaint(0, 0, new Color(40, 40, 70), getWidth(), getHeight(), new Color(30, 30, 50)));
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        topPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 45));
+        topPanel.add(scoreLabel, BorderLayout.CENTER);
+
+        // Status Bar
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setBackground(COLOR_BG_STATUS);
+        statusPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 30));
+
+        statusBar = new JLabel();
+        statusBar.setFont(FONT_STATUS);
+        statusBar.setForeground(Color.DARK_GRAY);
+        statusBar.setOpaque(false);
+        statusBar.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        statusBar.setHorizontalAlignment(SwingConstants.LEFT);
+
+        JButton backButton = new JButton("Back");
+        backButton.setFocusPainted(false);
+        backButton.setFont(FONT_STATUS);
+        backButton.setMargin(new Insets(2, 10, 2, 10));
+        backButton.setBackground(new Color(230, 230, 230));
+        backButton.addActionListener(e -> {
+            deleteGame(); // Optional: clean up game state
+            new StartMenu(new JFrame());  // Implement this method
+        });
+
+        statusPanel.add(statusBar, BorderLayout.CENTER);
+        statusPanel.add(backButton, BorderLayout.EAST);
+
+        boardPanel = new BoardPanel();
+        boardPanel.setBackground(COLOR_BG);
+        boardPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                syncBoardFromDB();
+
+                int mouseX = e.getX();
+                int mouseY = e.getY();
+                int row = mouseY / Cell.SIZE;
+                int col = mouseX / Cell.SIZE;
+
+                if (row < 0 || row >= Board.ROWS || col < 0 || col >= Board.COLS) return;
+
+                if (gameContext.getCurrentState() != State.PLAYING) {
+                    newGame();
+                    dbManager.clearMoves(gameContext.getGameId());
+                    boardPanel.repaint();
+                    return;
+                }
+
+                boolean isLocalPlayersTurn =
+                        (gameContext.getCurrentPlayer() == Seed.CROSS && "Player X".equals(localPlayer)) ||
+                                (gameContext.getCurrentPlayer() == Seed.NOUGHT && "Player O".equals(localPlayer));
+
+                if (!isLocalPlayersTurn) {
+                    statusBar.setText("Wait for your turn!");
+                    return;
+                }
+
+                if (board.cells[row][col].content == Seed.NO_SEED) {
+                    State newState = board.stepGame(gameContext.getCurrentPlayer(), row, col);
+                    gameContext.setCurrentState(newState);
+
+                    int moveNumber = ++lastSyncedMoveNumber;
+                    dbManager.insertMove(gameContext.getGameId(),
+                            gameContext.getCurrentPlayer() == Seed.CROSS ? 'X' : 'O',
+                            row, col, moveNumber);
+
+                    if (newState == State.CROSS_WON) gameContext.incrementPlayerXScore();
+                    else if (newState == State.NOUGHT_WON) gameContext.incrementPlayerOScore();
+
+                    gameContext.switchPlayer();
+                    setCurrentPlayer(gameContext.getCurrentPlayer() == Seed.CROSS ? "Player X" : "Player O");
+                    updateScoreLabel();
+                    boardPanel.repaint();
+                }
+            }
+        });
+
+        add(topPanel, BorderLayout.NORTH);
+        add(boardPanel, BorderLayout.CENTER);
+        add(statusPanel, BorderLayout.SOUTH);
+
     }
 
     private void updateScoreLabel() {
@@ -123,8 +207,6 @@ public class MultiplayerGameMain extends JPanel {
 
     public void initGame() {
         board = new Board();
-
-        // sync dengan DB pas inisiasi
         List<Move> moves = dbManager.getMoves(gameContext.getGameId());
         lastSyncedMoveNumber = moves.size();
         for (Move move : moves) {
@@ -141,16 +223,15 @@ public class MultiplayerGameMain extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG);
         board.paint(g);
 
         switch (gameContext.getCurrentState()) {
             case PLAYING:
-                statusBar.setForeground(Color.BLACK);
-                if ((gameContext.getCurrentPlayer() == Seed.CROSS && localPlayer == "Player X") ||
-                        (gameContext.getCurrentPlayer() == Seed.NOUGHT && localPlayer == "Player O")) {
+                statusBar.setForeground(Color.DARK_GRAY);
+                if ((gameContext.getCurrentPlayer() == Seed.CROSS && "Player X".equals(localPlayer)) ||
+                        (gameContext.getCurrentPlayer() == Seed.NOUGHT && "Player O".equals(localPlayer))) {
                     statusBar.setText("Your Turn");
                 } else {
                     statusBar.setText("Opponent's Turn");
@@ -158,39 +239,29 @@ public class MultiplayerGameMain extends JPanel {
                 break;
 
             case DRAW:
-                statusBar.setForeground(Color.RED);
+                statusBar.setForeground(new Color(200, 50, 50));
                 statusBar.setText("It's a Draw! Click to play again.");
                 SoundEffect.EXPLODE.play();
                 break;
 
             case CROSS_WON:
-                statusBar.setForeground(Color.RED);
-                if (localPlayer == "Player X") {
-                    statusBar.setText("You Won! Click to play again.");
-                } else {
-                    statusBar.setText("You Lost. Click to play again.");
-                }
+                statusBar.setForeground(new Color(200, 50, 50));
+                statusBar.setText((localPlayer.equals("Player X") ? "You Won!" : "You Lost.") + " Click to play again.");
                 SoundEffect.EXPLODE.play();
                 break;
 
             case NOUGHT_WON:
-                statusBar.setForeground(Color.RED);
-                if (localPlayer == "Player O") {
-                    statusBar.setText("You Won! Click to play again.");
-                } else {
-                    statusBar.setText("You Lost. Click to play again.");
-                }
+                statusBar.setForeground(new Color(200, 50, 50));
+                statusBar.setText((localPlayer.equals("Player O") ? "You Won!" : "You Lost.") + " Click to play again.");
                 SoundEffect.EXPLODE.play();
                 break;
         }
-
     }
 
     private void syncBoardFromDB() {
         List<Move> moves = dbManager.getMoves(gameContext.getGameId());
 
         if (moves.isEmpty() && lastSyncedMoveNumber > 0) {
-            System.out.println("Detected game reset from DB. Clearing local board.");
             board.newGame();
             gameContext.resetGameState();
             setCurrentPlayer("Player X");
@@ -205,7 +276,7 @@ public class MultiplayerGameMain extends JPanel {
                 board.cells[move.row][move.col].content = seed;
                 State newState = board.checkGameState(seed, move.row, move.col);
                 gameContext.setCurrentState(newState);
-                gameContext.setCurrentPlayer((seed == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS);
+                gameContext.setCurrentPlayer(seed == Seed.CROSS ? Seed.NOUGHT : Seed.CROSS);
                 lastSyncedMoveNumber = move.moveNumber;
 
                 if (newState == State.CROSS_WON) gameContext.incrementPlayerXScore();
@@ -218,30 +289,8 @@ public class MultiplayerGameMain extends JPanel {
         repaint();
     }
 
-    public void deleteGame(){
-        this.dbManager.deleteGame(this.gameContext.getGameId());
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame(MultiplayerGameMain.TITLE);
-            MultiplayerGameMain gamePanel = new MultiplayerGameMain();
-
-            frame.setContentPane(gamePanel);
-            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-            frame.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    gamePanel.deleteGame();
-                    System.exit(0);
-                }
-            });
-
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        });
+    public void deleteGame() {
+        dbManager.deleteGame(gameContext.getGameId());
     }
 
     private String getLocalPlayer() {
@@ -251,4 +300,41 @@ public class MultiplayerGameMain extends JPanel {
     private void setCurrentPlayer(String player) {
         gameContext.setCurrentPlayer("Player X".equals(player) ? Seed.CROSS : Seed.NOUGHT);
     }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame(TITLE);
+            MultiplayerGameMain gamePanel = new MultiplayerGameMain();
+
+            frame.setContentPane(gamePanel);
+            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    gamePanel.deleteGame();
+                    System.exit(0);
+                }
+            });
+
+            frame.pack();
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
+
+    private class BoardPanel extends JPanel {
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            board.paint(g);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT);
+        }
+    }
+
 }
+

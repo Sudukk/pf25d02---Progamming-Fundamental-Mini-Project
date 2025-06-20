@@ -9,7 +9,7 @@ public class Board {
     // Define named constants for drawing
     public static final int CANVAS_WIDTH = Cell.SIZE * COLS;  // the drawing canvas
     public static final int CANVAS_HEIGHT = Cell.SIZE * ROWS;
-    public static final int GRID_WIDTH = 8;  // Grid-line's width
+    public static final int GRID_WIDTH = 2;  // Grid-line's width
     public static final int GRID_WIDTH_HALF = GRID_WIDTH / 2; // Grid-line's half-width
     public static final Color COLOR_GRID = Color.LIGHT_GRAY;  // grid lines
     public static final int Y_OFFSET = 1;  // Fine tune for better display
@@ -120,6 +120,7 @@ public class Board {
     /** Paint itself on the graphics canvas, given the Graphics context */
     public void paint(Graphics g) {
         // Draw the grid-lines
+
         g.setColor(COLOR_GRID);
         for (int row = 1; row < ROWS; ++row) {
             g.fillRoundRect(0, Cell.SIZE * row - GRID_WIDTH_HALF,
