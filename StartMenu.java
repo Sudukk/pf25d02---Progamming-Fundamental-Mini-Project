@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 
 public class StartMenu extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -23,16 +24,22 @@ public class StartMenu extends JPanel {
         addButton(frame, "Play Multiplayer", () -> startMultiplayerGame(frame));
         addButton(frame, "Options", () -> startSettingsMenu(frame));
         addButton(frame, "Exit Game", () -> System.exit(0));
+
     }
 
-    private void addButton(JFrame frame, String text, Runnable action) {
+    private JButton createButton(String text, Color color, Runnable action) {
         JButton button = new JButton(text);
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setMaximumSize(new Dimension(200, 40));
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        button.setAlignmentY(10);
+        button.setFont(new Font("SegoeUI", Font.BOLD, 20));
+        button.setMaximumSize(new Dimension(240, 50));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.addActionListener(e -> action.run());
-        add(button);
-        add(Box.createRigidArea(new Dimension(0, 15)));
+        return button;
     }
 
     private void startDuoGame(JFrame frame) {
@@ -47,7 +54,20 @@ public class StartMenu extends JPanel {
             playerO = "Player O";
 
         frame.setContentPane(new GameMain(playerX, playerO));
-        frame.revalidate(); // refresh UI
+
+ // refresh UI
+
+        frame.setSize(400,400);
+        frame.setResizable(false);
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    private void startBotGame(JFrame frame) {
+        frame.setContentPane(new GameBotMain("Player X"));
+        frame.setSize(400,400);
+        frame.setResizable(false);
+        frame.revalidate();
         frame.repaint();
     }
 
@@ -59,11 +79,13 @@ public class StartMenu extends JPanel {
     }
 
     private void startMultiplayerGame(JFrame frame) {
+        String playerName = JOptionPane.showInputDialog(frame, "Enter your username:", "Player X", JOptionPane.QUESTION_MESSAGE);
+        if (playerName == null || playerName.trim().isEmpty()) playerName = "Unnamed Player";
 
-        MultiplayerGameMain gamePanel = new MultiplayerGameMain();
+        MultiplayerGameMain gamePanel = new MultiplayerGameMain(playerName);
         frame.setContentPane(gamePanel);
+        frame.setSize(400,400);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
