@@ -21,7 +21,7 @@ public class StartMenu extends JPanel {
         addButton(frame, "Play Duo", () -> startDuoGame(frame));
         addButton(frame, "Play with Bot", () -> JOptionPane.showMessageDialog(frame, "Bot mode not implemented yet."));
         addButton(frame, "Play Multiplayer", () -> startMultiplayerGame(frame));
-        addButton(frame, "Options", () -> JOptionPane.showMessageDialog(frame, "Options menu not implemented yet."));
+        addButton(frame, "Options", () -> startSettingsMenu(frame));
         addButton(frame, "Exit Game", () -> System.exit(0));
     }
 
@@ -36,15 +36,26 @@ public class StartMenu extends JPanel {
     }
 
     private void startDuoGame(JFrame frame) {
-        String playerX = JOptionPane.showInputDialog(frame, "Enter name for Player X:", "Player X", JOptionPane.QUESTION_MESSAGE);
-        if (playerX == null || playerX.trim().isEmpty()) playerX = "Player X";
+        String playerX = JOptionPane.showInputDialog(frame, "Enter name for Player X:", "Player X",
+                JOptionPane.QUESTION_MESSAGE);
+        if (playerX == null || playerX.trim().isEmpty())
+            playerX = "Player X";
 
-        String playerO = JOptionPane.showInputDialog(frame, "Enter name for Player O:", "Player O", JOptionPane.QUESTION_MESSAGE);
-        if (playerO == null || playerO.trim().isEmpty()) playerO = "Player O";
+        String playerO = JOptionPane.showInputDialog(frame, "Enter name for Player O:", "Player O",
+                JOptionPane.QUESTION_MESSAGE);
+        if (playerO == null || playerO.trim().isEmpty())
+            playerO = "Player O";
 
         frame.setContentPane(new GameMain(playerX, playerO));
-        frame.revalidate();  // refresh UI
+        frame.revalidate(); // refresh UI
         frame.repaint();
+    }
+
+    private void startSettingsMenu(JFrame frame) {
+        frame.setContentPane(new SettingsMenu());
+        frame.revalidate(); // refresh UI
+        frame.repaint();
+
     }
 
     private void startMultiplayerGame(JFrame frame) {
