@@ -1,10 +1,7 @@
 import java.io.IOException;
 import java.net.URL;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.*;
+
 /**
  * This enum encapsulates all the sound effects of a game, so as to separate the sound playing
  * codes from the game codes.
@@ -20,18 +17,22 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public enum SoundEffect {
     EAT_FOOD("audio/eatfood.wav"),
     EXPLODE("audio/explode.wav"),
-    DIE("audio/die.wav");
+    DIE("audio/die.wav"),
+    BG_MUSIC("audio/bgmusic.wav"),
+    MOUSE_CLICK("audio/die.wav");
 
     /** Nested enumeration for specifying volume */
-    public static enum Volume {
+    public enum Volume {
         MUTE, LOW, MEDIUM, HIGH
     }
 
-    public static Volume volume = Volume.LOW;
+    public Volume volume = Volume.LOW;
 
     /** Each sound effect has its own clip, loaded with its own sound file. */
-    private Clip clip;
+    public static Volume masterVolume = Volume.LOW;
 
+    private Clip clip;
+    private FloatControl gainControl;
     /** Private Constructor to construct each element of the enum with its own sound file. */
     private SoundEffect(String soundFileName) {
         try {
@@ -43,6 +44,9 @@ public enum SoundEffect {
             clip = AudioSystem.getClip();
             // Open audio clip and load samples from the audio input stream.
             clip.open(audioInputStream);
+            if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            }
         } catch (UnsupportedAudioFileException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -58,8 +62,36 @@ public enum SoundEffect {
             if (clip.isRunning())
                 clip.stop();   // Stop the player if it is still running
             clip.setFramePosition(0); // rewind to the beginning
+            setClipVolume(masterVolume);
             clip.start();     // Start playing
         }
+    }
+
+    public static void playBGMusic() {
+        SoundEffect.BG_MUSIC.stop();
+        SoundEffect.BG_MUSIC.setClipVolume(SoundEffect.masterVolume);
+        SoundEffect.BG_MUSIC.clip.setFramePosition(0);
+        SoundEffect.BG_MUSIC.clip.loop(Clip.LOOP_CONTINUOUSLY);
+    }
+
+
+    public void stop() {
+        if (clip.isRunning()) {
+            clip.stop();
+        }
+    }
+
+    private void setClipVolume(Volume volume) {
+        if (gainControl == null) return;
+
+        float dB;
+        switch (volume) {
+            case HIGH:   dB = 10.0f; break;        // Full volume
+            case MEDIUM: dB = 5.0f; break;
+            case LOW:    dB = -10.0f; break;
+            default:     dB = 5.0f; break;      // Practically mute
+        }
+        gainControl.setValue(dB);
     }
 
     /** Optional static method to pre-load all the sound files. */

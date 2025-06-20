@@ -4,6 +4,7 @@ public class GameManager {
     public static final String TITLE = "Tic Tac Toe";
 
     public static void main(String[] args) {
+        SoundEffect.playBGMusic();
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame(TITLE);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

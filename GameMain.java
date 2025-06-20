@@ -35,11 +35,12 @@ public class GameMain extends JPanel {
         this.playerOName = playerOName;
         this.playerXScore = 0;
         this.playerOScore = 0;
-
+        SoundEffect.masterVolume = SoundEffect.Volume.LOW;
         // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
+
                 SoundEffect.EAT_FOOD.play();
                 int mouseX = e.getX();
                 int mouseY = e.getY();
