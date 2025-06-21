@@ -53,12 +53,6 @@ public enum SoundEffect {
         }
     }
 
-    public void stop() {
-        if (clip != null && clip.isRunning()) {
-            clip.stop();
-        }
-    }
-
     private void setVolume(float volume) {
         if (gainControl == null)
             return;
