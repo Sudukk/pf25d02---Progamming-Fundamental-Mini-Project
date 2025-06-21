@@ -4,7 +4,7 @@ public class GameBotMain extends GameBase {
     }
 
     @Override
-    protected void handleClick(int x, int y) {
+    public void handleClick(int x, int y) {
         int row = y / Cell.SIZE;
         int col = x / Cell.SIZE;
 
