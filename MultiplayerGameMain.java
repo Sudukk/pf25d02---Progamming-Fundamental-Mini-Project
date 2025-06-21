@@ -70,7 +70,7 @@ public class MultiplayerGameMain extends GameBase {
 
         JPanel topPanel = new JPanel(new BorderLayout()) {
             @Override
-            protected void paintComponent(Graphics g) {
+            public void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setPaint(new GradientPaint(0, 0, new Color(40, 40, 70), getWidth(), getHeight(), new Color(30, 30, 50)));
@@ -162,7 +162,7 @@ public class MultiplayerGameMain extends GameBase {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
         board.paint(g);
 

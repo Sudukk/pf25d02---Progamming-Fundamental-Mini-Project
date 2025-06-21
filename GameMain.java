@@ -1,4 +1,10 @@
 public class GameMain extends GameBase {
+    /**
+     * Tic-Tac-Toe: Two-player Graphic version with better OO design.
+     * The Board and Cell classes are separated in their own classes.
+     */
+
+    /** Constructor to setup the UI and game components */
     public GameMain(String playerXName, String playerOName) {
         super(playerXName, playerOName);
         initGame();

@@ -21,15 +21,14 @@ public class GameBase extends JPanel {
     public GameBase(String playerXName, String playerOName) {
         this.playerXName = playerXName;
         this.playerOName = playerOName;
-
-
-
     }
 
+    /** Initialize the game (run once) */
     public void initGame() {
         this.board = new Board();
     }
 
+    /** Reset the game-board contents and the current-state, ready for new game */
     public void newGame() {
         for (int row = 0; row < Board.ROWS; ++row)
             for (int col = 0; col < Board.COLS; ++col)
@@ -133,7 +132,7 @@ public class GameBase extends JPanel {
         //bikin pauseOverlay
         this.pauseOverlay = new JPanel() {
             @Override
-            protected void paintComponent(Graphics g) {
+            public void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 // Optional: dark overlay
                 g.setColor(new Color(0, 0, 0, 150));
