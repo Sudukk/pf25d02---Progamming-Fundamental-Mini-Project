@@ -10,12 +10,14 @@ public abstract class GameBase extends JPanel {
     protected JLabel statusBar;
     protected JLabel scoreLabel;
 
+
     protected String playerXName;
     protected String playerOName;
     protected int playerXScore = 0;
     protected int playerOScore = 0;
 
     protected BoardPanel boardPanel;
+    private JPanel pauseOverlay;
 
     public GameBase(String playerXName, String playerOName) {
         this.playerXName = playerXName;
@@ -54,20 +56,13 @@ public abstract class GameBase extends JPanel {
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
 
-        JButton backButton = new JButton("Back");
-        backButton.setFocusPainted(false);
-        backButton.setFont(GameConstants.FONT_STATUS);
-        backButton.setMargin(new Insets(2, 10, 2, 10));
-        backButton.setBackground(new Color(230, 230, 230));
-        backButton.addActionListener(e -> {
+        JButton pauseButton = new JButton("Pause");
+        pauseButton.setFocusPainted(false);
+        pauseButton.setFont(GameConstants.FONT_STATUS);
+        pauseButton.setMargin(new Insets(2, 10, 2, 10));
+        pauseButton.setBackground(new Color(230, 230, 230));
+        pauseButton.addActionListener(e -> showPauseMenu());
 
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            topFrame.getContentPane().removeAll();
-            topFrame.getContentPane().add(new StartMenu(topFrame));
-            topFrame.setSize(720,800);
-            topFrame.revalidate();
-            topFrame.repaint();
-        });
 
         JPanel topPanel = new JPanel(new BorderLayout()) {
             @Override protected void paintComponent(Graphics g) {
@@ -91,7 +86,12 @@ public abstract class GameBase extends JPanel {
         statusBar.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
         statusBar.setHorizontalAlignment(SwingConstants.LEFT);
         statusPanel.add(statusBar, BorderLayout.CENTER);
-        statusPanel.add(backButton, BorderLayout.EAST);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(pauseButton);
+        statusPanel.add(buttonPanel, BorderLayout.EAST);
+
 
         // bikin panel board
         boardPanel = new BoardPanel(board);
@@ -120,6 +120,83 @@ public abstract class GameBase extends JPanel {
             case NOUGHT_WON -> statusBar.setText(playerOName + " Won! Click anywhere to play again.");
         }
     }
+
+    protected void showPauseMenu() {
+        if (pauseOverlay != null) return;
+
+        pauseOverlay = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Optional: dark overlay
+                g.setColor(new Color(0, 0, 0, 150));
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+
+        pauseOverlay.setLayout(new BoxLayout(pauseOverlay, BoxLayout.Y_AXIS));
+        pauseOverlay.setOpaque(false); // we'll paint manually
+        pauseOverlay.setFocusable(true);
+        pauseOverlay.requestFocusInWindow();
+
+        // Consume all mouse events so nothing underneath can be clicked
+        pauseOverlay.addMouseListener(new MouseAdapter() {});
+        pauseOverlay.addMouseMotionListener(new MouseMotionAdapter() {});
+        pauseOverlay.addMouseWheelListener(e -> {});
+
+        // Create the button box
+        JPanel buttonBox = new JPanel();
+        buttonBox.setOpaque(false);
+        buttonBox.setLayout(new BoxLayout(buttonBox, BoxLayout.Y_AXIS));
+
+        JButton continueButton = new JButton("Continue");
+        continueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        continueButton.setFont(GameConstants.FONT_STATUS);
+        continueButton.addActionListener(e -> hidePauseMenu());
+
+        JButton exitButton = new JButton("Exit to Menu");
+        exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exitButton.setFont(GameConstants.FONT_STATUS);
+        exitButton.addActionListener(e -> {
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+            topFrame.getContentPane().removeAll();
+            topFrame.setContentPane(new StartMenu(topFrame));
+            topFrame.setSize(720, 800);
+            topFrame.revalidate();
+            topFrame.repaint();
+        });
+
+        buttonBox.add(Box.createVerticalGlue());
+        buttonBox.add(continueButton);
+        buttonBox.add(Box.createRigidArea(new Dimension(0, 20)));
+        buttonBox.add(exitButton);
+        buttonBox.add(Box.createVerticalGlue());
+
+        pauseOverlay.add(Box.createVerticalGlue());
+        pauseOverlay.add(buttonBox);
+        pauseOverlay.add(Box.createVerticalGlue());
+
+        setLayout(null);
+        add(pauseOverlay);
+        SwingUtilities.invokeLater(() -> {
+            pauseOverlay.setBounds(0, 0, getWidth(), getHeight());
+            setComponentZOrder(pauseOverlay, 0);
+            revalidate();
+            repaint();
+        });
+    }
+
+
+    protected void hidePauseMenu() {
+        if (pauseOverlay != null) {
+            remove(pauseOverlay);
+            pauseOverlay = null;
+            setLayout(new BorderLayout());
+            revalidate();
+            repaint();
+        }
+    }
+
 
     protected abstract void handleClick(int x, int y);
 }
