@@ -3,19 +3,19 @@ import java.awt.*;
 import java.awt.event.*;
 
 public abstract class GameBase extends JPanel {
-    protected Board board;
-    protected State currentState;
-    protected Seed currentPlayer;
+    public Board board;
+    public State currentState;
+    public Seed currentPlayer;
 
-    protected JLabel statusBar;
-    protected JLabel scoreLabel;
+    public JLabel statusBar;
+    public JLabel scoreLabel;
 
-    protected String playerXName;
-    protected String playerOName;
-    protected int playerXScore = 0;
-    protected int playerOScore = 0;
+    public String playerXName;
+    public String playerOName;
+    public int playerXScore = 0;
+    public int playerOScore = 0;
 
-    protected BoardPanel boardPanel;
+    public BoardPanel boardPanel;
 
     public GameBase(String playerXName, String playerOName) {
         this.playerXName = playerXName;
@@ -28,11 +28,11 @@ public abstract class GameBase extends JPanel {
         updateStatusBar();
     }
 
-    protected void initGame() {
+    public void initGame() {
         this.board = new Board();
     }
 
-    protected void newGame() {
+    public void newGame() {
         for (int row = 0; row < Board.ROWS; ++row)
             for (int col = 0; col < Board.COLS; ++col)
                 board.cells[row][col].content = Seed.NO_SEED;
@@ -41,7 +41,7 @@ public abstract class GameBase extends JPanel {
         currentState = State.PLAYING;
     }
 
-    protected void setupUI() {
+    public void setupUI() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 70));
         setBackground(GameConstants.COLOR_BG);
@@ -53,7 +53,7 @@ public abstract class GameBase extends JPanel {
         scoreLabel.setForeground(new Color(240, 240, 255));
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
-
+        //bikin back button
         JButton backButton = new JButton("Back");
         backButton.setFocusPainted(false);
         backButton.setFont(GameConstants.FONT_STATUS);
@@ -70,7 +70,7 @@ public abstract class GameBase extends JPanel {
         });
 
         JPanel topPanel = new JPanel(new BorderLayout()) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override public void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setPaint(new GradientPaint(0, 0, new Color(40, 40, 70), getWidth(), getHeight(), new Color(30, 30, 50)));
@@ -107,11 +107,11 @@ public abstract class GameBase extends JPanel {
         add(statusPanel, BorderLayout.SOUTH);
     }
 
-    protected void updateScoreLabel() {
+    public void updateScoreLabel() {
         scoreLabel.setText(playerXName + ": " + playerXScore + "   |   " + playerOName + ": " + playerOScore);
     }
 
-    protected void updateStatusBar() {
+    public void updateStatusBar() {
         if (statusBar == null) return;
         switch (currentState) {
             case PLAYING -> statusBar.setText((currentPlayer == Seed.CROSS ? playerXName : playerOName) + "'s Turn");
@@ -121,5 +121,7 @@ public abstract class GameBase extends JPanel {
         }
     }
 
-    protected abstract void handleClick(int x, int y);
+    public void handleClick(int x, int y){
+        //buat nanti di override sama childrennya
+    };
 }

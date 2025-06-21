@@ -30,76 +30,30 @@ public class MultiplayerGameMain extends JPanel {
 
     public MultiplayerGameMain(String playerName) {
         this.dbManager = new DBManager();
+        this.oppName = "";
+
         int gameId;
-        oppName = "";
+
         if (dbManager.isGamesTableEmpty()) {
-            localPlayer = "Player X";
+            this.localPlayer = "Player X";
             this.isHost = true;
             this.playerName = playerName;
             gameId = dbManager.createNewGame(this.playerName, this.isHost);
         } else {
             gameId = this.dbManager.getLatestGameId();
-            localPlayer = "Player O";
+            this.localPlayer = "Player O";
             this.isHost = false;
             this.playerName = playerName;
             dbManager.insertOppName(gameId, this.playerName);
         }
         this.gameContext = new MultiplayerGameContext(gameId);
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                syncBoardFromDB();
-
-                int mouseX = e.getX();
-                int mouseY = e.getY();
-                int row = mouseY / Cell.SIZE;
-                int col = mouseX / Cell.SIZE;
-
-                if (row < 0 || row >= Board.ROWS || col < 0 || col >= Board.COLS) return;
-
-                if (gameContext.getCurrentState() != State.PLAYING) {
-                    newGame();
-                    dbManager.clearMoves(gameContext.getGameId());
-                    repaint();
-                    return;
-                }
-
-                boolean isLocalPlayersTurn =
-                        (gameContext.getCurrentPlayer() == Seed.CROSS && "Player X".equals(localPlayer)) ||
-                                (gameContext.getCurrentPlayer() == Seed.NOUGHT && "Player O".equals(localPlayer));
-
-                if (!isLocalPlayersTurn) {
-                    statusBar.setText("Wait for your turn!");
-                    return;
-                }
-
-                if (board.cells[row][col].content == Seed.NO_SEED) {
-                    State newState = board.stepGame(gameContext.getCurrentPlayer(), row, col);
-                    gameContext.setCurrentState(newState);
-
-                    int moveNumber = ++lastSyncedMoveNumber;
-                    dbManager.insertMove(gameContext.getGameId(),
-                            gameContext.getCurrentPlayer() == Seed.CROSS ? 'X' : 'O',
-                            row, col, moveNumber);
-
-                    if (newState == State.CROSS_WON) gameContext.incrementPlayerXScore();
-                    else if (newState == State.NOUGHT_WON) gameContext.incrementPlayerOScore();
-
-                    gameContext.switchPlayer();
-                    setCurrentPlayer(gameContext.getCurrentPlayer() == Seed.CROSS ? "Player X" : "Player O");
-                    updateScoreLabel();
-                    repaint();
-                }
-            }
-        });
-
         initGame();
         setupUI();
         newGame();
         updateScoreLabel();
 
-        this.syncTimer = new Timer(1000, e -> syncBoardFromDB());
+        this.syncTimer = new Timer(100, e -> syncBoardFromDB());
         this.syncTimer.start();
 
     }
@@ -142,12 +96,13 @@ public class MultiplayerGameMain extends JPanel {
         statusBar.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
         statusBar.setHorizontalAlignment(SwingConstants.LEFT);
 
-        JButton backButton = new JButton("Back");
-        backButton.setFocusPainted(false);
-        backButton.setFont(FONT_STATUS);
-        backButton.setMargin(new Insets(2, 10, 2, 10));
-        backButton.setBackground(new Color(230, 230, 230));
-        backButton.addActionListener(e -> {
+        //tambah tombol back
+        JButton exitButton = new JButton("Exit");
+        exitButton.setFocusPainted(false);
+        exitButton.setFont(FONT_STATUS);
+        exitButton.setMargin(new Insets(2, 10, 2, 10));
+        exitButton.setBackground(new Color(230, 230, 230));
+        exitButton.addActionListener(e -> {
             deleteGame();
 
             if (this.syncTimer != null) {
@@ -163,22 +118,28 @@ public class MultiplayerGameMain extends JPanel {
         });
 
         statusPanel.add(statusBar, BorderLayout.CENTER);
-        statusPanel.add(backButton, BorderLayout.EAST);
+        statusPanel.add(exitButton, BorderLayout.EAST);
 
         boardPanel = new BoardPanel(this.board);
         boardPanel.setBackground(COLOR_BG);
         boardPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                syncBoardFromDB();
-
                 int mouseX = e.getX();
                 int mouseY = e.getY();
                 int row = mouseY / Cell.SIZE;
                 int col = mouseX / Cell.SIZE;
 
+                //kalau diluar batas tidak melakukan apa-apa
                 if (row < 0 || row >= Board.ROWS || col < 0 || col >= Board.COLS) return;
 
+                //hanya bisa klik kalo giliran kita
+                Seed currentTurn = gameContext.getCurrentPlayer();
+                if ((isHost && currentTurn != Seed.CROSS) || (!isHost && currentTurn != Seed.NOUGHT)) {
+                    return;
+                }
+
+                // kalau statenya tidak playing maka reset semua
                 if (gameContext.getCurrentState() != State.PLAYING) {
                     newGame();
                     dbManager.clearMoves(gameContext.getGameId());
@@ -186,15 +147,7 @@ public class MultiplayerGameMain extends JPanel {
                     return;
                 }
 
-                boolean isLocalPlayersTurn =
-                        (gameContext.getCurrentPlayer() == Seed.CROSS && "Player X".equals(localPlayer)) ||
-                                (gameContext.getCurrentPlayer() == Seed.NOUGHT && "Player O".equals(localPlayer));
-
-                if (!isLocalPlayersTurn) {
-                    statusBar.setText("Wait for your turn!");
-                    return;
-                }
-
+                //kalau board bagian row dan col kosong, maka player dapat mengisinya
                 if (board.cells[row][col].content == Seed.NO_SEED) {
                     State newState = board.stepGame(gameContext.getCurrentPlayer(), row, col);
                     gameContext.setCurrentState(newState);
@@ -232,7 +185,6 @@ public class MultiplayerGameMain extends JPanel {
         }
         scoreLabel.setText(label);
     }
-
 
     public void initGame() {
         board = new Board();
@@ -289,9 +241,13 @@ public class MultiplayerGameMain extends JPanel {
 
     private void syncBoardFromDB() {
         List<Move> moves = dbManager.getMoves(gameContext.getGameId());
-        String oppName = dbManager.getOppName(this.isHost);
-        this.oppName = oppName;
 
+        // klo nama lawan masih kosong (loading/baru join) ambil nama lawan sekali saja
+        if (this.oppName == null || this.oppName.isEmpty()) {
+            this.oppName = dbManager.getOppName(this.isHost);
+        }
+
+        // If board is empty but previously synced moves exist, reset the board
         if (moves.isEmpty() && lastSyncedMoveNumber > 0) {
             board.newGame();
             gameContext.resetGameState();
@@ -299,26 +255,32 @@ public class MultiplayerGameMain extends JPanel {
             lastSyncedMoveNumber = 0;
         }
 
-        for (Move move : moves) {
+        for (int i =0;i<moves.size();i++) {
+            Move move = moves.get(i);
             if (move.moveNumber <= lastSyncedMoveNumber) continue;
 
+            if (board.cells[move.row][move.col].content != Seed.NO_SEED) continue;
+
             Seed seed = (move.player == 'X') ? Seed.CROSS : Seed.NOUGHT;
-            if (board.cells[move.row][move.col].content == Seed.NO_SEED) {
-                board.cells[move.row][move.col].content = seed;
-                State newState = board.checkGameState(seed, move.row, move.col);
-                gameContext.setCurrentState(newState);
-                gameContext.setCurrentPlayer(seed == Seed.CROSS ? Seed.NOUGHT : Seed.CROSS);
-                lastSyncedMoveNumber = move.moveNumber;
+            board.cells[move.row][move.col].content = seed;
 
-                if (newState == State.CROSS_WON) gameContext.incrementPlayerXScore();
-                else if (newState == State.NOUGHT_WON) gameContext.incrementPlayerOScore();
+            State newState = board.checkGameState(seed, move.row, move.col);
 
-                updateScoreLabel();
+            gameContext.setCurrentState(newState);
+            gameContext.setCurrentPlayer(seed == Seed.CROSS ? Seed.NOUGHT : Seed.CROSS);
+
+            lastSyncedMoveNumber = move.moveNumber;
+
+            switch (newState) {
+                case CROSS_WON -> gameContext.incrementPlayerXScore();
+                case NOUGHT_WON -> gameContext.incrementPlayerOScore();
             }
-        }
 
+            updateScoreLabel();
+        }
         repaint();
     }
+
 
     public void deleteGame() {
         dbManager.deleteGame(gameContext.getGameId());
