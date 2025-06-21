@@ -8,20 +8,29 @@ public class GameMain extends GameBase {
         int row = y / Cell.SIZE;
         int col = x / Cell.SIZE;
 
-        if (outOfBounds(row, col)) return;
+        if (outOfBounds(row, col))
+            return;
         if (currentState != State.PLAYING) {
-            newGame(); updateStatusBar(); boardPanel.repaint(); return;
+            newGame();
+            updateStatusBar();
+            boardPanel.repaint();
+            return;
         }
 
         if (board.cells[row][col].content == Seed.NO_SEED) {
             currentState = board.stepGame(currentPlayer, row, col);
 
-            if (currentState == State.CROSS_WON) playerXScore++;
-            else if (currentState == State.NOUGHT_WON) playerOScore++;
+            if (currentState == State.CROSS_WON)
+                playerXScore++;
+            else if (currentState == State.NOUGHT_WON)
+                playerOScore++;
 
+            SoundEffect.MOUSE_CLICK.play(5);
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
 
-            updateScoreLabel(); updateStatusBar(); boardPanel.repaint();
+            updateScoreLabel();
+            updateStatusBar();
+            boardPanel.repaint();
         }
     }
 

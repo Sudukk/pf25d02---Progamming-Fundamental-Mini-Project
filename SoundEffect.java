@@ -7,7 +7,7 @@ public enum SoundEffect {
     EXPLODE("audio/explode.wav"),
     DIE("audio/die.wav"),
     BG_MUSIC("audio/bgmusic.wav"),
-    MOUSE_CLICK("audio/mouseclick.wav");  // fixed wrong path
+    MOUSE_CLICK("audio/mouseclick.wav"); // fixed wrong path
 
     public static float sfxVolume = 100f;
     public static float musicVolume = 100f;
@@ -43,6 +43,16 @@ public enum SoundEffect {
         }
     }
 
+    public void play(float volume) {
+        if (this != BG_MUSIC && sfxVolume > 0) {
+            if (clip.isRunning())
+                clip.stop();
+            clip.setFramePosition(0);
+            setVolume(sfxVolume / volume);
+            clip.start();
+        }
+    }
+
     public void stop() {
         if (clip != null && clip.isRunning()) {
             clip.stop();
@@ -50,7 +60,8 @@ public enum SoundEffect {
     }
 
     private void setVolume(float volume) {
-        if (gainControl == null) return;
+        if (gainControl == null)
+            return;
 
         float min = gainControl.getMinimum();
         float max = gainControl.getMaximum();
@@ -65,7 +76,8 @@ public enum SoundEffect {
     }
 
     public static void playBGMusic() {
-        if (BG_MUSIC.clip == null) return;
+        if (BG_MUSIC.clip == null)
+            return;
 
         if (!isBGMusicPlaying) {
             BG_MUSIC.clip.loop(Clip.LOOP_CONTINUOUSLY);
@@ -85,12 +97,10 @@ public enum SoundEffect {
         }
     }
 
-
     public static void updateBGMusicVolume(int newVolume) {
         musicVolume = newVolume;
         BG_MUSIC.setVolume(musicVolume / 100f);
     }
-
 
     public static void initGame() {
         values(); // preload all clips
