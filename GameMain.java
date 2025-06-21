@@ -1,6 +1,11 @@
 public class GameMain extends GameBase {
     public GameMain(String playerXName, String playerOName) {
         super(playerXName, playerOName);
+        initGame();
+        setupUI();
+        newGame();
+        updateScoreLabel();
+        updateStatusBar();
     }
 
     @Override
@@ -8,7 +13,10 @@ public class GameMain extends GameBase {
         int row = y / Cell.SIZE;
         int col = x / Cell.SIZE;
 
-        if (outOfBounds(row, col)) return;
+        if (outOfBounds(row, col)){
+            return;
+        }
+
         if (currentState != State.PLAYING) {
             newGame(); updateStatusBar(); boardPanel.repaint(); return;
         }
@@ -21,7 +29,9 @@ public class GameMain extends GameBase {
 
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
 
-            updateScoreLabel(); updateStatusBar(); boardPanel.repaint();
+            updateScoreLabel();
+            updateStatusBar();
+            boardPanel.repaint();
         }
     }
 
