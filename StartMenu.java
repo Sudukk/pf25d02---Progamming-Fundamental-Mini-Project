@@ -4,8 +4,6 @@ import java.awt.event.*;
 import java.net.URL;
 
 public class StartMenu extends JPanel {
-    private static final long serialVersionUID = 1L;
-
     public StartMenu(JFrame frame) {
 
         setLayout(new BorderLayout());
@@ -37,22 +35,6 @@ public class StartMenu extends JPanel {
             centerPanel.add(Box.createVerticalStrut(30));
             centerPanel.add(fallback);
         }
-
-//        URL logoURL = getClass().getResource("/images/tictactoe_logo.png");
-//        if (logoURL != null) {
-//            JLabel logoLabel = new JLabel(new ImageIcon(logoURL));
-//            logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            centerPanel.add(Box.createVerticalStrut(30));
-//            centerPanel.add(logoLabel);
-//        } else {
-//            System.err.println("Logo image not found!");
-//            JLabel fallback = new JLabel("Tic Tac Toe");
-//            fallback.setFont(new Font("SegoeUI", Font.BOLD, 36));
-//            fallback.setForeground(Color.WHITE);
-//            fallback.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            centerPanel.add(Box.createVerticalStrut(30));
-//            centerPanel.add(fallback);
-//        }
 
         centerPanel.add(Box.createVerticalStrut(40));
         centerPanel.add(createButton("Play Now!", new Color(2,21,38), () -> startDuoGame(frame)));

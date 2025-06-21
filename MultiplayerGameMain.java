@@ -13,7 +13,6 @@ public class MultiplayerGameMain extends GameBase {
     private MultiplayerGameContext gameContext;
     private int lastSyncedMoveNumber = 0;
     private String localPlayer;
-    private BoardPanel boardPanel;
     private Timer syncTimer;
     private String playerName;
     private boolean isHost;
@@ -61,7 +60,7 @@ public class MultiplayerGameMain extends GameBase {
         setBackground(GameConstants.COLOR_BG);
         setBorder(BorderFactory.createLineBorder(new Color(100, 100, 130), 3));
 
-        // Top Score Panel
+        //top score panel
         scoreLabel = new JLabel();
         scoreLabel.setFont(GameConstants.FONT_SCORE);
         scoreLabel.setForeground(new Color(240, 240, 255));
@@ -80,7 +79,7 @@ public class MultiplayerGameMain extends GameBase {
         topPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 45));
         topPanel.add(scoreLabel, BorderLayout.CENTER);
 
-        // Status Bar
+        //status bar
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.setBackground(GameConstants.COLOR_BG_STATUS);
         statusPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 30));
@@ -116,7 +115,6 @@ public class MultiplayerGameMain extends GameBase {
         statusPanel.add(statusBar, BorderLayout.CENTER);
         statusPanel.add(exitButton, BorderLayout.EAST);
 
-        boardPanel = new BoardPanel(this.board);
         boardPanel.setBackground(GameConstants.COLOR_BG);
         boardPanel.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {

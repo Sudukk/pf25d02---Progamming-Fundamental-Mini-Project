@@ -1,9 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import java.lang.reflect.Field;
 import java.io.File;
-import java.util.ArrayList;
 
 public class SettingsMenu extends JPanel {
     public class VolumesMenu extends JPanel {
@@ -59,44 +57,6 @@ public class SettingsMenu extends JPanel {
             add(musicVolume);
             add(Box.createRigidArea(new Dimension(0, 15)));
         }
-
-    }
-
-    public class UIMenu extends JPanel {
-        JLabel bgColorLabel;
-        JComboBox<String> bgColorDropdown;
-        JLabel textSizeLabel;
-        JComboBox<String> textSizeDropdown;
-
-        public UIMenu() {
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            add(Box.createRigidArea(new Dimension(0, 15)));
-
-            String[] bgColors = getAvailableColors();
-            bgColorDropdown = new JComboBox<>(bgColors);
-
-            bgColorLabel = new JLabel("Selected: ");
-            bgColorDropdown.addActionListener(_ -> {
-                String selectedColor = (String) bgColorDropdown.getSelectedItem();
-                bgColorLabel.setText(bgColorLabel.getText() + selectedColor);
-            });
-
-            String[] textSizes = { "small", "medium", "large" };
-            textSizeDropdown = new JComboBox<>(textSizes);
-
-            textSizeLabel = new JLabel("Selected: ");
-            textSizeDropdown.addActionListener(_ -> {
-                String selectedText = (String) textSizeDropdown.getSelectedItem();
-                textSizeLabel.setText(textSizeLabel.getText() + selectedText);
-            });
-
-            add(bgColorLabel);
-            add(bgColorDropdown);
-            add(Box.createRigidArea(new Dimension(0, 15)));
-            add(textSizeLabel);
-            add(textSizeDropdown);
-            add(Box.createRigidArea(new Dimension(0, 15)));
-        }
     }
 
     public class IconMenu extends JPanel {
@@ -115,7 +75,7 @@ public class SettingsMenu extends JPanel {
             XIconBtn = new JButton("Set X Icon");
             OIconBtn = new JButton("Set O Icon");
 
-            // Button actions
+            //perilaku button
             XIconBtn.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -138,7 +98,7 @@ public class SettingsMenu extends JPanel {
                 }
             });
 
-            // XIcon Button
+            //XIcon Button
             XIconBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
             XIconBtn.setAlignmentY(10);
             XIconBtn.setFont(new Font("SegoeUI", Font.BOLD, 20));
@@ -151,7 +111,7 @@ public class SettingsMenu extends JPanel {
             XIconLabel.setFont(new Font("SegoeUI", Font.ITALIC, 16));
             XIconLabel.setForeground(Color.WHITE);
 
-            // OIcon Button
+            //OIcon Button
             OIconBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
             OIconBtn.setAlignmentY(10);
             OIconBtn.setFont(new Font("SegoeUI", Font.BOLD, 20));
@@ -164,7 +124,7 @@ public class SettingsMenu extends JPanel {
             OIconLabel.setFont(new Font("SegoeUI", Font.ITALIC, 16));
             OIconLabel.setForeground(Color.WHITE);
 
-            // Use glue to center vertically
+            //        pakai glue untuk memusatkan secara vertikal
             add(Box.createVerticalGlue());
             add(XIconBtn);
             add(Box.createRigidArea(new Dimension(0, 10)));
@@ -236,25 +196,5 @@ public class SettingsMenu extends JPanel {
         add(settingsTitle, BorderLayout.NORTH);
         add(menus, BorderLayout.CENTER);
         add(backBtn, BorderLayout.SOUTH);
-    }
-
-    private String[] getAvailableColors() {
-        ArrayList<String> colors = new ArrayList<>();
-
-        Field[] fields = Color.class.getFields();
-
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            if (field.getType() == Color.class) {
-                if (i % 2 == 0) {
-                    colors.add(field.getName());
-                }
-            }
-        }
-
-        String[] colorsArray = new String[colors.size()];
-        colorsArray = colors.toArray(colorsArray);
-
-        return colorsArray;
     }
 }
