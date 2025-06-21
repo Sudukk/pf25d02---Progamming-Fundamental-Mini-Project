@@ -102,8 +102,6 @@ public class GameBase extends JPanel {
             }
         });
 
-
-
         add(topPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);

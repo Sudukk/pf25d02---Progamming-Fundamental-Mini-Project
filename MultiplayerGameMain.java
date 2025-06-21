@@ -93,10 +93,15 @@ public class MultiplayerGameMain extends GameBase {
 
         //tambah tombol back
         JButton exitButton = new JButton("Exit");
-        exitButton.setFocusPainted(false);
-        exitButton.setFont(GameConstants.FONT_STATUS);
         exitButton.setMargin(new Insets(2, 10, 2, 10));
-        exitButton.setBackground(new Color(230, 230, 230));
+        exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exitButton.setAlignmentY(10);
+        exitButton.setFont(GameConstants.FONT_STATUS);
+        exitButton.setMaximumSize(new Dimension(240, 50));
+        exitButton.setBackground(GameConstants.COLOR_BG);
+        exitButton.setForeground(Color.WHITE);
+        exitButton.setFocusPainted(false);
+        exitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         exitButton.addActionListener(e -> {
             deleteGame();
 
