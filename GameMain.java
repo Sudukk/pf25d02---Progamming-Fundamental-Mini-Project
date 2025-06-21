@@ -1,6 +1,11 @@
 public class GameMain extends GameBase {
     public GameMain(String playerXName, String playerOName) {
         super(playerXName, playerOName);
+        initGame();
+        setupUI();
+        newGame();
+        updateScoreLabel();
+        updateStatusBar();
     }
 
     @Override
@@ -8,8 +13,10 @@ public class GameMain extends GameBase {
         int row = y / Cell.SIZE;
         int col = x / Cell.SIZE;
 
+
         if (outOfBounds(row, col))
             return;
+      
         if (currentState != State.PLAYING) {
             newGame();
             updateStatusBar();

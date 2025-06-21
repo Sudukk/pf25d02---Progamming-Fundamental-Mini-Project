@@ -1,6 +1,11 @@
 public class GameBotMain extends GameBase {
     public GameBotMain(String playerXName) {
         super(playerXName, "Bot");
+        initGame();
+        setupUI();
+        newGame();
+        updateScoreLabel();
+        updateStatusBar();
     }
 
     @Override
