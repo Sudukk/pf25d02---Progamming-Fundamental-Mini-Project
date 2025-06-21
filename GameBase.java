@@ -23,11 +23,7 @@ public class GameBase extends JPanel {
         this.playerOName = playerOName;
 
 
-        initGame();
-        setupUI();
-        newGame();
-        updateScoreLabel();
-        updateStatusBar();
+
     }
 
     public void initGame() {
