@@ -133,6 +133,7 @@ public class StartMenu extends JPanel {
         JTextField playerOField = new JTextField("Player O", 15);
 
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+
         panel.add(new JLabel("Enter name for Player X:"));
         panel.add(playerXField);
         panel.add(new JLabel("Enter name for Player O:"));

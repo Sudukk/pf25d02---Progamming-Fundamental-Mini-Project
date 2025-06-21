@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public abstract class GameBase extends JPanel {
+public class GameBase extends JPanel {
     public Board board;
     public State currentState;
     public Seed currentPlayer;
@@ -21,6 +21,7 @@ public abstract class GameBase extends JPanel {
     public GameBase(String playerXName, String playerOName) {
         this.playerXName = playerXName;
         this.playerOName = playerOName;
+
 
         initGame();
         setupUI();
@@ -55,10 +56,16 @@ public abstract class GameBase extends JPanel {
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         JButton pauseButton = new JButton("Pause");
-        pauseButton.setFocusPainted(false);
-        pauseButton.setFont(GameConstants.FONT_STATUS);
         pauseButton.setMargin(new Insets(2, 10, 2, 10));
-        pauseButton.setBackground(new Color(230, 230, 230));
+        pauseButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        pauseButton.setAlignmentY(10);
+        pauseButton.setFont(GameConstants.FONT_STATUS);
+        pauseButton.setMaximumSize(new Dimension(240, 50));
+        pauseButton.setBackground(GameConstants.COLOR_BG);
+        pauseButton.setForeground(Color.WHITE);
+        pauseButton.setFocusPainted(false);
+        pauseButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         pauseButton.addActionListener(e -> showPauseMenu());
 
 
@@ -100,6 +107,8 @@ public abstract class GameBase extends JPanel {
             }
         });
 
+
+
         add(topPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
@@ -122,12 +131,11 @@ public abstract class GameBase extends JPanel {
     public void handleClick(int x, int y){
         //buat nanti di override sama childrennya
     };
-}
 
-    protected void showPauseMenu() {
-        if (pauseOverlay != null) return;
 
-        pauseOverlay = new JPanel() {
+    public void showPauseMenu() {
+        //bikin pauseOverlay
+        this.pauseOverlay = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -137,29 +145,41 @@ public abstract class GameBase extends JPanel {
             }
         };
 
-        pauseOverlay.setLayout(new BoxLayout(pauseOverlay, BoxLayout.Y_AXIS));
-        pauseOverlay.setOpaque(false); // we'll paint manually
-        pauseOverlay.setFocusable(true);
-        pauseOverlay.requestFocusInWindow();
+        this.pauseOverlay.setLayout(new BoxLayout(pauseOverlay, BoxLayout.Y_AXIS));
+        this.pauseOverlay.setOpaque(false);
+        this.pauseOverlay.setFocusable(true);
+        this.pauseOverlay.requestFocusInWindow();
 
-        // Consume all mouse events so nothing underneath can be clicked
-        pauseOverlay.addMouseListener(new MouseAdapter() {});
-        pauseOverlay.addMouseMotionListener(new MouseMotionAdapter() {});
-        pauseOverlay.addMouseWheelListener(e -> {});
+        // supaya tidak bisa klik boardnya saat sedang di pause\
+        this.pauseOverlay.addMouseListener(new MouseAdapter() {});
+        this.pauseOverlay.addMouseMotionListener(new MouseMotionAdapter() {});
+        this.pauseOverlay.addMouseWheelListener(e -> {});
 
-        // Create the button box
+        // bikin box buat tombol continue dan exit
         JPanel buttonBox = new JPanel();
         buttonBox.setOpaque(false);
         buttonBox.setLayout(new BoxLayout(buttonBox, BoxLayout.Y_AXIS));
 
         JButton continueButton = new JButton("Continue");
         continueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        continueButton.setAlignmentY(10);
         continueButton.setFont(GameConstants.FONT_STATUS);
+        continueButton.setMaximumSize(new Dimension(240, 50));
+        continueButton.setBackground(GameConstants.COLOR_BG);
+        continueButton.setForeground(Color.WHITE);
+        continueButton.setFocusPainted(false);
         continueButton.addActionListener(e -> hidePauseMenu());
 
         JButton exitButton = new JButton("Exit to Menu");
         exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        exitButton.setAlignmentY(10);
         exitButton.setFont(GameConstants.FONT_STATUS);
+        exitButton.setMaximumSize(new Dimension(240, 50));
+        exitButton.setBackground(GameConstants.COLOR_BG);
+        exitButton.setForeground(Color.WHITE);
+        exitButton.setFocusPainted(false);
+        exitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
         exitButton.addActionListener(e -> {
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             topFrame.getContentPane().removeAll();
@@ -190,7 +210,7 @@ public abstract class GameBase extends JPanel {
     }
 
 
-    protected void hidePauseMenu() {
+    public void hidePauseMenu() {
         if (pauseOverlay != null) {
             remove(pauseOverlay);
             pauseOverlay = null;
