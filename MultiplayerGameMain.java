@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Timer;
 
@@ -144,7 +145,8 @@ public class MultiplayerGameMain extends GameBase {
 
     public void initGame() {
         board = new Board();
-        List<Move> moves = dbManager.getMoves(gameContext.getGameId());
+
+        ArrayList<Move> moves = dbManager.getMoves(gameContext.getGameId());
         lastSyncedMoveNumber = moves.size();
         for (Move move : moves) {
             Seed seed = (move.player == 'X') ? Seed.CROSS : Seed.NOUGHT;
@@ -261,6 +263,7 @@ public class MultiplayerGameMain extends GameBase {
 
         //kalau board bagian row dan col kosong, maka player dapat mengisinya
         if (board.cells[row][col].content == Seed.NO_SEED) {
+            SoundEffect.MOUSE_CLICK.play(5);
             State newState = board.stepGame(gameContext.getCurrentPlayer(), row, col);
             gameContext.setCurrentState(newState);
 

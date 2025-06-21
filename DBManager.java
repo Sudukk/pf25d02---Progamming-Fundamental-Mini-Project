@@ -40,8 +40,8 @@ public class DBManager {
         }
     }
 
-    public List<Move> getMoves(int gameId) {
-        List<Move> moves = new ArrayList<>();
+    public ArrayList<Move> getMoves(int gameId) {
+        ArrayList<Move> moves = new ArrayList<>();
         String sql = "SELECT player, `row`, `col`, move_number FROM moves WHERE game_id = ? ORDER BY move_number ASC";
 
         try (Connection conn = DriverManager.getConnection(jdbcUrl, userName, password);

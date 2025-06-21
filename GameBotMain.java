@@ -13,9 +13,14 @@ public class GameBotMain extends GameBase {
         int row = y / Cell.SIZE;
         int col = x / Cell.SIZE;
 
-        if (outOfBounds(row, col)) return;
+        if (outOfBounds(row, col)) {
+            return;
+        }
         if (currentState != State.PLAYING) {
-            newGame(); updateStatusBar(); boardPanel.repaint(); return;
+            newGame();
+            updateStatusBar();
+            boardPanel.repaint();
+            return;
         }
 
         if (board.cells[row][col].content == Seed.NO_SEED) {
@@ -23,7 +28,7 @@ public class GameBotMain extends GameBase {
             if (currentState == State.CROSS_WON) playerXScore++;
 
             currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
-
+            SoundEffect.MOUSE_CLICK.play(5);
             updateScoreLabel(); updateStatusBar(); boardPanel.repaint();
 
             if (currentPlayer == Seed.NOUGHT && currentState == State.PLAYING) {
