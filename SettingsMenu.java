@@ -32,7 +32,6 @@ public class SettingsMenu extends JPanel {
             SFXVolume.setValue((int) SoundEffect.sfxVolume); // added
             SFXVolume.addChangeListener(e -> {
                 SoundEffect.updateAllSFXVolume(SFXVolume.getValue());
-                System.out.println("SFX volume set to " + SoundEffect.sfxVolume);
             });
             musicVolumeLable = new JLabel("Music Volume");
             musicVolumeLable.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -49,7 +48,6 @@ public class SettingsMenu extends JPanel {
             musicVolume.setValue((int) SoundEffect.musicVolume); // added
             musicVolume.addChangeListener(e -> {
                 SoundEffect.musicVolume = musicVolume.getValue();
-                System.out.println("Music volume set to " + SoundEffect.musicVolume);
                 SoundEffect.updateBGMusicVolume(musicVolume.getValue());
             });
 
@@ -140,7 +138,7 @@ public class SettingsMenu extends JPanel {
                 }
             });
 
-            //XIcon Button
+            // XIcon Button
             XIconBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
             XIconBtn.setAlignmentY(10);
             XIconBtn.setFont(new Font("SegoeUI", Font.BOLD, 20));
@@ -153,8 +151,7 @@ public class SettingsMenu extends JPanel {
             XIconLabel.setFont(new Font("SegoeUI", Font.ITALIC, 16));
             XIconLabel.setForeground(Color.WHITE);
 
-
-            //OIcon Button
+            // OIcon Button
             OIconBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
             OIconBtn.setAlignmentY(10);
             OIconBtn.setFont(new Font("SegoeUI", Font.BOLD, 20));
@@ -185,8 +182,7 @@ public class SettingsMenu extends JPanel {
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setAcceptAllFileFilterUsed(true);
             chooser.addChoosableFileFilter(
-                    new javax.swing.filechooser.FileNameExtensionFilter("PNG Images", "png")
-            );
+                    new javax.swing.filechooser.FileNameExtensionFilter("PNG Images", "png"));
 
             int result = chooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -217,7 +213,6 @@ public class SettingsMenu extends JPanel {
         backBtn.setForeground(Color.BLACK);
         backBtn.setFocusPainted(false);
 
-
         backBtn.addActionListener(e -> {
             frame.setContentPane(new StartMenu(frame));
             frame.revalidate();
@@ -226,17 +221,16 @@ public class SettingsMenu extends JPanel {
 
         VolumesMenu volumes = new VolumesMenu();
         volumes.setBackground(GameConstants.COLOR_BG);
-//        UIMenu uimenu = new UIMenu();
+        // UIMenu uimenu = new UIMenu();
         IconMenu iconmenu = new IconMenu();
         iconmenu.setBackground(GameConstants.COLOR_BG);
-
 
         menus = new JPanel();
         menus.setBackground(GameConstants.COLOR_BG);
 
         menus.setLayout(new BorderLayout());
         menus.add(volumes, BorderLayout.NORTH);
-//        menus.add(uimenu, BorderLayout.CENTER);
+        // menus.add(uimenu, BorderLayout.CENTER);
         menus.add(iconmenu, BorderLayout.CENTER);
 
         add(settingsTitle, BorderLayout.NORTH);
