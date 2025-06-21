@@ -115,6 +115,7 @@ public class MultiplayerGameMain extends GameBase {
         statusPanel.add(statusBar, BorderLayout.CENTER);
         statusPanel.add(exitButton, BorderLayout.EAST);
 
+        boardPanel = new BoardPanel(this.board);
         boardPanel.setBackground(GameConstants.COLOR_BG);
         boardPanel.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
