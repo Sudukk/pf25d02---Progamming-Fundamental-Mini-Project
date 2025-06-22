@@ -219,8 +219,8 @@ public class MultiplayerGameMain extends GameBase {
 
         for (int i =0;i<moves.size();i++) {
             Move move = moves.get(i);
-            if (move.moveNumber <= lastSyncedMoveNumber) continue;
 
+            if (move.moveNumber <= lastSyncedMoveNumber) continue;
             if (board.cells[move.row][move.col].content != Seed.NO_SEED) continue;
 
             Seed seed = (move.player == 'X') ? Seed.CROSS : Seed.NOUGHT;
@@ -234,8 +234,12 @@ public class MultiplayerGameMain extends GameBase {
             lastSyncedMoveNumber = move.moveNumber;
 
             switch (newState) {
-                case CROSS_WON -> gameContext.incrementPlayerXScore();
-                case NOUGHT_WON -> gameContext.incrementPlayerOScore();
+                case CROSS_WON :
+                    gameContext.incrementPlayerXScore();
+                    break;
+                case NOUGHT_WON :
+                    gameContext.incrementPlayerOScore();
+                    break;
             }
 
             updateScoreLabel();

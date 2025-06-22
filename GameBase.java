@@ -114,10 +114,18 @@ public class GameBase extends JPanel {
     public void updateStatusBar() {
         if (statusBar == null) return;
         switch (currentState) {
-            case PLAYING -> statusBar.setText((currentPlayer == Seed.CROSS ? playerXName : playerOName) + "'s Turn");
-            case DRAW -> statusBar.setText("It's a Draw! Click anywhere to play again.");
-            case CROSS_WON -> statusBar.setText(playerXName + " Won! Click anywhere to play again.");
-            case NOUGHT_WON -> statusBar.setText(playerOName + " Won! Click anywhere to play again.");
+            case PLAYING :
+                statusBar.setText((currentPlayer == Seed.CROSS ? playerXName : playerOName) + "'s Turn");
+                break;
+            case DRAW :
+                statusBar.setText("It's a Draw! Click anywhere to play again.");
+                break;
+            case CROSS_WON :
+                statusBar.setText(playerXName + " Won! Click anywhere to play again.");
+                break;
+            case NOUGHT_WON :
+                statusBar.setText(playerOName + " Won! Click anywhere to play again.");
+                break;
         }
     }
 
@@ -132,7 +140,6 @@ public class GameBase extends JPanel {
             @Override
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                // Optional: dark overlay
                 g.setColor(new Color(0, 0, 0, 150));
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
