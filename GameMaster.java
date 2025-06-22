@@ -1,9 +1,9 @@
 import javax.swing.*;
 
-public class GameManager {
+public class GameMaster {
     public static final String TITLE = "Tic Tac Toe";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         SoundEffect.playBGMusic();
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame(TITLE);

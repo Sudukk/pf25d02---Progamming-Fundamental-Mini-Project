@@ -1,9 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * A separate class for the Tic-Tac-Toe board panel.
- */
 public class BoardPanel extends JPanel {
     private Board board;
 

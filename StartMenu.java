@@ -5,17 +5,15 @@ import java.net.URL;
 
 public class StartMenu extends JPanel {
     public StartMenu(JFrame frame) {
-
         setLayout(new BorderLayout());
-        setBackground(GameConstants.COLOR_BG); // Warna biru toska terang
+        setBackground(GameConstants.COLOR_BG);
 
-        // Panel tengah untuk tombol dan logo
+        //panel tengah untuk tombol dan logo
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setOpaque(false);
 
-        // Tambahkan logo Tic Tac Toe
-
+        //tambahkan logo Tic Tac Toe
         URL logoURL = getClass().getClassLoader().getResource("images/tictactoe_logo.png");
         if (logoURL != null) {
             ImageIcon originalLogo = new ImageIcon(logoURL);
@@ -86,11 +84,11 @@ public class StartMenu extends JPanel {
         exitButton.addActionListener(e -> System.exit(0));
         rightPanel.add(exitButton);
 
-// Tambahkan ke bottomPanel
+        // Tambahkan ke bottomPanel
         bottomPanel.add(leftPanel, BorderLayout.WEST);
         bottomPanel.add(rightPanel, BorderLayout.EAST);
 
-// Tambahkan bottomPanel ke layout utama
+        // Tambahkan bottomPanel ke layout utama
         add(bottomPanel, BorderLayout.SOUTH);
 
     }
@@ -116,9 +114,9 @@ public class StartMenu extends JPanel {
 
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
 
-        panel.add(new JLabel("Enter name for Player X:"));
+        panel.add(new JLabel("Enter name for X:"));
         panel.add(playerXField);
-        panel.add(new JLabel("Enter name for Player O:"));
+        panel.add(new JLabel("Enter name for O:"));
         panel.add(playerOField);
 
         int result = JOptionPane.showConfirmDialog(
@@ -168,7 +166,7 @@ public class StartMenu extends JPanel {
 
     private void startSettingsMenu(JFrame frame) {
         frame.setContentPane(new SettingsMenu(frame));
-        frame.revalidate(); // refresh UI
+        frame.revalidate();
         frame.repaint();
 
     }
@@ -191,7 +189,7 @@ public class StartMenu extends JPanel {
         if (result == JOptionPane.OK_OPTION) {
             playerName = usernameField.getText().trim();
             if (playerName.isEmpty()) {
-                playerName = "Player X"; // fallback if empty
+                playerName = "Player X";
             }
 
             MultiplayerGameMain gamePanel = new MultiplayerGameMain(playerName);

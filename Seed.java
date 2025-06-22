@@ -65,9 +65,6 @@ public enum Seed {   // to save as "Seed.java"
 
 
     // Public getters
-    public String getDisplayName() {
-        return displayName;
-    }
     public Image getImage() {
         return img;
     }

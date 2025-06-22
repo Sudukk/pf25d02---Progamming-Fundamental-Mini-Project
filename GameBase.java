@@ -202,7 +202,6 @@ public class GameBase extends JPanel {
         });
     }
 
-
     public void hidePauseMenu() {
         if (pauseOverlay != null) {
             remove(pauseOverlay);
