@@ -146,6 +146,7 @@ public class MultiplayerGameMain extends GameBase {
         scoreLabel.setText(label);
     }
 
+    @Override
     public void initGame() {
         board = new Board();
 
@@ -159,6 +160,7 @@ public class MultiplayerGameMain extends GameBase {
         }
     }
 
+    @Override
     public void newGame() {
         board.newGame();
         gameContext.resetGameState();
