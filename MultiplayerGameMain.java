@@ -2,7 +2,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.Timer;
 
 public class MultiplayerGameMain extends GameBase {
@@ -152,7 +151,9 @@ public class MultiplayerGameMain extends GameBase {
 
         ArrayList<Move> moves = dbManager.getMoves(gameContext.getGameId());
         lastSyncedMoveNumber = moves.size();
-        for (Move move : moves) {
+
+        for (int i = 0; i < moves.size(); i++) {
+            Move move = moves.get(i);
             Seed seed = (move.player == 'X') ? Seed.CROSS : Seed.NOUGHT;
             board.cells[move.row][move.col].content = seed;
         }
@@ -202,7 +203,7 @@ public class MultiplayerGameMain extends GameBase {
     }
 
     private void syncBoardFromDB() {
-        List<Move> moves = dbManager.getMoves(gameContext.getGameId());
+        ArrayList<Move> moves = dbManager.getMoves(gameContext.getGameId());
 
         // klo nama lawan masih kosong (loading/baru join) ambil nama lawan sekali saja
         if (this.oppName == null || this.oppName.isEmpty()) {
