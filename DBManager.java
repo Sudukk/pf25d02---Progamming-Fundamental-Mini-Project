@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class DBManager {
 
+    //credentialnya
     private final String host = "tic-tac-toe-db-tic-tac-toe.f.aivencloud.com";
     private final String databaseName = "tictactoe";
     private final String userName = "avnadmin";
@@ -11,6 +12,7 @@ public class DBManager {
     private final String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslMode=REQUIRED";
 
     public DBManager() {
+        //coba koneksi ke db, kalau tersambung akan menunjukkan versinya
         try (Connection connection = DriverManager.getConnection(jdbcUrl, userName, password);
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery("SELECT version() AS version")) {
@@ -23,6 +25,7 @@ public class DBManager {
             e.printStackTrace();
         }
     }
+
 
     public void insertMove(int gameId, char player, int row, int col, int moveNumber) {
         String sql = "INSERT INTO moves (game_id, player, `row`, `col`, move_number) VALUES (?, ?, ?, ?, ?)";

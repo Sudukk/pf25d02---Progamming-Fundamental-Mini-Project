@@ -2,69 +2,64 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.ArrayList;
-import javax.swing.Timer;
 
 public class MultiplayerGameMain extends GameBase {
     private Board board;
     private JLabel statusBar;
     private JLabel scoreLabel;
     private DBManager dbManager;
-    private MultiplayerGameContext gameContext;
-    private int lastSyncedMoveNumber = 0;
+
+    private int gameId;
+    private int playerXScore = 0;
+    private int playerOScore = 0;
+    private Seed currentPlayer = Seed.CROSS;
+    private State currentState = State.PLAYING;
+
     private String localPlayer;
-    private Timer syncTimer;
-    private String playerName;
     private boolean isHost;
-    private String oppName;
+    private String playerName;
+    private String opponentName = "";
+
+    private int lastSyncedMoveNumber = 0;
+    private Timer syncTimer;
 
     public MultiplayerGameMain(String playerName) {
-        super(null,null);
-
-        //connect ke db
+        super(null, null);
+        this.playerName = playerName;
         this.dbManager = new DBManager();
-        this.oppName = "";
 
-        int gameId;
-
-        // set apakah host atau bukan host
         if (dbManager.isGamesTableEmpty()) {
-            this.localPlayer = "Player X";
             this.isHost = true;
-            this.playerName = playerName;
-            gameId = dbManager.createNewGame(this.playerName, this.isHost);
+            this.localPlayer = "Player X";
+            this.gameId = dbManager.createNewGame(playerName, true);
         } else {
-            gameId = this.dbManager.getLatestGameId();
-            this.localPlayer = "Player O";
             this.isHost = false;
-            this.playerName = playerName;
-            dbManager.insertOppName(gameId, this.playerName);
+            this.localPlayer = "Player O";
+            this.gameId = dbManager.getLatestGameId();
+            dbManager.insertOppName(gameId, playerName);
         }
-        this.gameContext = new MultiplayerGameContext(gameId);
 
         initGame();
         setupUI();
         newGame();
         updateScoreLabel();
 
-        this.syncTimer = new Timer(100, e -> syncBoardFromDB());
-        this.syncTimer.start();
-
+        syncTimer = new Timer(100, e->syncBoardFromDB());
+        syncTimer.start();
     }
 
     @Override
     public void setupUI() {
-        setLayout(new BorderLayout(0,0));
+        setLayout(new BorderLayout());
 
         setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 70));
         setBackground(GameConstants.COLOR_BG);
         setBorder(BorderFactory.createLineBorder(new Color(100, 100, 130), 3));
 
-        //top score panel
         scoreLabel = new JLabel();
         scoreLabel.setFont(GameConstants.FONT_SCORE);
-        scoreLabel.setForeground(new Color(240, 240, 255));
+        scoreLabel.setForeground(Color.WHITE);
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        scoreLabel.setOpaque(false);
 
         JPanel topPanel = new JPanel(new BorderLayout()) {
             @Override
@@ -78,7 +73,6 @@ public class MultiplayerGameMain extends GameBase {
         topPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 45));
         topPanel.add(scoreLabel, BorderLayout.CENTER);
 
-        //status bar
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.setBackground(GameConstants.COLOR_BG_STATUS);
         statusPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 30));
@@ -86,32 +80,20 @@ public class MultiplayerGameMain extends GameBase {
         statusBar = new JLabel();
         statusBar.setFont(GameConstants.FONT_STATUS);
         statusBar.setForeground(Color.DARK_GRAY);
-        statusBar.setOpaque(false);
         statusBar.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
-        statusBar.setHorizontalAlignment(SwingConstants.LEFT);
 
-        //tambah tombol back
         JButton exitButton = new JButton("Exit");
-        exitButton.setMargin(new Insets(2, 10, 2, 10));
-        exitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        exitButton.setAlignmentY(10);
         exitButton.setFont(GameConstants.FONT_STATUS);
-        exitButton.setMaximumSize(new Dimension(240, 50));
         exitButton.setBackground(GameConstants.COLOR_BG);
         exitButton.setForeground(Color.WHITE);
         exitButton.setFocusPainted(false);
         exitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         exitButton.addActionListener(e -> {
             deleteGame();
-
-            if (this.syncTimer != null) {
-                this.syncTimer.stop();
-            }
-
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-            topFrame.getContentPane().removeAll();
-            topFrame.getContentPane().add(new StartMenu(topFrame));
-            topFrame.setSize(720,800);
+            if (syncTimer != null) syncTimer.stop();
+            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(MultiplayerGameMain.this);
+            topFrame.setContentPane(new StartMenu(topFrame));
+            topFrame.setSize(720, 800);
             topFrame.revalidate();
             topFrame.repaint();
         });
@@ -122,7 +104,8 @@ public class MultiplayerGameMain extends GameBase {
         boardPanel = new BoardPanel(this.board);
         boardPanel.setBackground(GameConstants.COLOR_BG);
         boardPanel.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 handleClick(e.getX(), e.getY());
             }
         });
@@ -130,18 +113,16 @@ public class MultiplayerGameMain extends GameBase {
         add(topPanel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(statusPanel, BorderLayout.SOUTH);
-
     }
 
+    //update skornya sesuai nama playernya
     @Override
     public void updateScoreLabel() {
         String label;
-        if ("Player X".equals(localPlayer)) {
-            label = this.playerName + ": " + gameContext.getPlayerXScore() +
-                    "   |   " + this.oppName + ": " + gameContext.getPlayerOScore();
+        if (localPlayer.equals("Player X")) {
+            label = playerName + ": " + playerXScore + "   |   " + opponentName + ": " + playerOScore;
         } else {
-            label = this.playerName + ": " + gameContext.getPlayerOScore() +
-                    "   |   " + this.oppName + ": " + gameContext.getPlayerXScore();
+            label = playerName + ": " + playerOScore + "   |   " + opponentName + ": " + playerXScore;
         }
         scoreLabel.setText(label);
     }
@@ -149,10 +130,10 @@ public class MultiplayerGameMain extends GameBase {
     @Override
     public void initGame() {
         board = new Board();
-
-        ArrayList<Move> moves = dbManager.getMoves(gameContext.getGameId());
+        ArrayList<Move> moves = dbManager.getMoves(gameId);
         lastSyncedMoveNumber = moves.size();
 
+        //memasukkan seed ke boardnya berdasarkan moves yg ada di DB
         for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
             Seed seed = (move.player == 'X') ? Seed.CROSS : Seed.NOUGHT;
@@ -163,8 +144,8 @@ public class MultiplayerGameMain extends GameBase {
     @Override
     public void newGame() {
         board.newGame();
-        gameContext.resetGameState();
-        setCurrentPlayer("Player X");
+        currentPlayer = Seed.CROSS;
+        currentState = State.PLAYING;
         lastSyncedMoveNumber = 0;
     }
 
@@ -173,78 +154,54 @@ public class MultiplayerGameMain extends GameBase {
         super.paintComponent(g);
         board.paint(g);
 
-        switch (gameContext.getCurrentState()) {
-            case PLAYING:
-                statusBar.setForeground(Color.DARK_GRAY);
-                if ((gameContext.getCurrentPlayer() == Seed.CROSS && "Player X".equals(localPlayer)) ||
-                        (gameContext.getCurrentPlayer() == Seed.NOUGHT && "Player O".equals(localPlayer))) {
-                    statusBar.setText("Your Turn");
-                } else {
-                    statusBar.setText("Opponent's Turn");
-                }
-                break;
-
-            case DRAW:
-                statusBar.setForeground(new Color(200, 50, 50));
-                statusBar.setText("It's a Draw! Click to play again.");
-                SoundEffect.EXPLODE.play();
-                break;
-
-            case CROSS_WON:
-                statusBar.setForeground(new Color(200, 50, 50));
-                statusBar.setText((localPlayer.equals("Player X") ? "You Won!" : "You Lost.") + " Click to play again.");
-                SoundEffect.EXPLODE.play();
-                break;
-
-            case NOUGHT_WON:
-                statusBar.setForeground(new Color(200, 50, 50));
-                statusBar.setText((localPlayer.equals("Player O") ? "You Won!" : "You Lost.") + " Click to play again.");
-                SoundEffect.EXPLODE.play();
-                break;
+        if (currentState == State.PLAYING) {
+            statusBar.setForeground(Color.DARK_GRAY);
+            boolean isLocalTurn = (currentPlayer == Seed.CROSS && localPlayer.equals("Player X")) || (currentPlayer == Seed.NOUGHT && localPlayer.equals("Player O"));
+            statusBar.setText(isLocalTurn ? "Your Turn" : "Opponent's Turn");
+        } else if (currentState == State.DRAW) {
+            statusBar.setForeground(new Color(200, 50, 50));
+            statusBar.setText("It's a Draw! Click to play again.");
+            SoundEffect.EXPLODE.play();
+        } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
+            boolean won = (currentState == State.CROSS_WON && localPlayer.equals("Player X")) || (currentState == State.NOUGHT_WON && localPlayer.equals("Player O"));
+            statusBar.setForeground(new Color(200, 50, 50));
+            statusBar.setText((won ? "You Won!" : "You Lost.") + " Click to play again.");
+            SoundEffect.EXPLODE.play();
         }
     }
 
+    //method untuk sinkronisasi dengan db
     private void syncBoardFromDB() {
-        ArrayList<Move> moves = dbManager.getMoves(gameContext.getGameId());
+        ArrayList<Move> moves = dbManager.getMoves(gameId);
 
-        // klo nama lawan masih kosong (loading/baru join) ambil nama lawan sekali saja
-        if (this.oppName == null || this.oppName.isEmpty()) {
-            this.oppName = dbManager.getOppName(this.isHost);
+        //ambil nama klo nama opponent masih kosong
+        if (opponentName == null || opponentName.isEmpty()) {
+            opponentName = dbManager.getOppName(isHost);
         }
 
-        // klo boardnya kosong tapi masih ada lastSyncedMoveNumber, reset boardnya biar sinkron
+        //klo tidak ada langkah tapi lastSyncedMoveNumber masih > 0 akan direset
         if (moves.isEmpty() && lastSyncedMoveNumber > 0) {
-            board.newGame();
-            gameContext.resetGameState();
-            setCurrentPlayer("Player X");
-            lastSyncedMoveNumber = 0;
+            newGame();
         }
 
-        for (int i =0;i<moves.size();i++) {
+        //looping setiap langkah yang ada di db
+        for (int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
 
+            //skip langkah kalo sudah diproses dan juga cek langkahnya valid atau tidak
             if (move.moveNumber <= lastSyncedMoveNumber) continue;
             if (board.cells[move.row][move.col].content != Seed.NO_SEED) continue;
 
+            //masukkan seed yg sesuai ke board
             Seed seed = (move.player == 'X') ? Seed.CROSS : Seed.NOUGHT;
             board.cells[move.row][move.col].content = seed;
-
-            State newState = board.checkGameState(seed, move.row, move.col);
-
-            gameContext.setCurrentState(newState);
-            gameContext.setCurrentPlayer(seed == Seed.CROSS ? Seed.NOUGHT : Seed.CROSS);
-
+            currentState = board.checkGameState(seed, move.row, move.col);
+            currentPlayer = (seed == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
             lastSyncedMoveNumber = move.moveNumber;
 
-            switch (newState) {
-                case CROSS_WON :
-                    gameContext.incrementPlayerXScore();
-                    break;
-                case NOUGHT_WON :
-                    gameContext.incrementPlayerOScore();
-                    break;
-            }
-
+            //tambah skor kalau playernya menang
+            if (currentState == State.CROSS_WON) playerXScore++;
+            if (currentState == State.NOUGHT_WON) playerOScore++;
             updateScoreLabel();
         }
         repaint();
@@ -255,50 +212,40 @@ public class MultiplayerGameMain extends GameBase {
         int row = y / Cell.SIZE;
         int col = x / Cell.SIZE;
 
-        //kalau diluar batas tidak melakukan apa-apa
+        //cek apakah posisi mouse diluar board atau tidak
         if (row < 0 || row >= Board.ROWS || col < 0 || col >= Board.COLS) return;
+        //cek apakah ini giliran dia atau tidak
+        if ((isHost && currentPlayer != Seed.CROSS) || (!isHost && currentPlayer != Seed.NOUGHT)) return;
 
-        //hanya bisa klik kalo giliran kita
-        Seed currentTurn = gameContext.getCurrentPlayer();
-        if ((isHost && currentTurn != Seed.CROSS) || (!isHost && currentTurn != Seed.NOUGHT)) {
-            return;
-        }
-
-        // kalau statenya tidak playing maka reset semua
-        if (gameContext.getCurrentState() != State.PLAYING) {
+        //kalau sedang tidak bermain reset semuanya
+        if (currentState != State.PLAYING) {
             newGame();
-            dbManager.clearMoves(gameContext.getGameId());
+            dbManager.clearMoves(gameId);
             boardPanel.repaint();
             return;
         }
 
-        //kalau board bagian row dan col kosong, maka player dapat mengisinya
+        //masukkan move ke database kalau boardnya itu kosong
         if (board.cells[row][col].content == Seed.NO_SEED) {
             SoundEffect.MOUSE_CLICK.play(5);
-            State newState = board.stepGame(gameContext.getCurrentPlayer(), row, col);
-            gameContext.setCurrentState(newState);
+            State newState = board.stepGame(currentPlayer, row, col); //memainkan movenya dan mengembalikan state yg baru
+            currentState = newState;
 
+            //update move numbernya dan simpan movenya ke db
             int moveNumber = ++lastSyncedMoveNumber;
-            dbManager.insertMove(gameContext.getGameId(),
-                    gameContext.getCurrentPlayer() == Seed.CROSS ? 'X' : 'O',
-                    row, col, moveNumber);
+            dbManager.insertMove(gameId, (currentPlayer == Seed.CROSS) ? 'X' : 'O', row, col, moveNumber);
 
-            if (newState == State.CROSS_WON) gameContext.incrementPlayerXScore();
-            else if (newState == State.NOUGHT_WON) gameContext.incrementPlayerOScore();
+            if (newState == State.CROSS_WON) playerXScore++;
+            else if (newState == State.NOUGHT_WON) playerOScore++;
 
-            gameContext.switchPlayer();
-            setCurrentPlayer(gameContext.getCurrentPlayer() == Seed.CROSS ? "Player X" : "Player O");
+            //switch playernya
+            currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
             updateScoreLabel();
             boardPanel.repaint();
         }
     }
 
     public void deleteGame() {
-        dbManager.deleteGame(gameContext.getGameId());
-    }
-
-    public void setCurrentPlayer(String player) {
-        gameContext.setCurrentPlayer("Player X".equals(player) ? Seed.CROSS : Seed.NOUGHT);
+        dbManager.deleteGame(gameId);
     }
 }
-

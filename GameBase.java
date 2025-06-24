@@ -38,18 +38,20 @@ public class GameBase extends JPanel {
         currentState = State.PLAYING;
     }
 
+    //setup uinya
     public void setupUI() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 70));
         setBackground(GameConstants.COLOR_BG);
         setBorder(BorderFactory.createLineBorder(new Color(100, 100, 130), 3));
 
-        // bikin score label
+        //bikin score label
         scoreLabel = new JLabel();
         scoreLabel.setFont(GameConstants.FONT_SCORE);
         scoreLabel.setForeground(new Color(240, 240, 255));
         scoreLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
+        //bikin tombol pause
         JButton pauseButton = new JButton("Pause");
         pauseButton.setMargin(new Insets(2, 10, 2, 10));
         pauseButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -61,9 +63,10 @@ public class GameBase extends JPanel {
         pauseButton.setFocusPainted(false);
         pauseButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        //tampilkan menu pause
         pauseButton.addActionListener(e -> showPauseMenu());
 
-
+        //bikin panel buat bagian atas
         JPanel topPanel = new JPanel(new BorderLayout()) {
             @Override public void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -75,7 +78,7 @@ public class GameBase extends JPanel {
         topPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 45));
         topPanel.add(scoreLabel, BorderLayout.CENTER);
 
-        // bikin statusbar
+        //bikin status panel dan statusbar
         JPanel statusPanel = new JPanel(new BorderLayout());
         statusPanel.setBackground(GameConstants.COLOR_BG_STATUS);
         statusPanel.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, 30));
@@ -87,13 +90,13 @@ public class GameBase extends JPanel {
         statusBar.setHorizontalAlignment(SwingConstants.LEFT);
         statusPanel.add(statusBar, BorderLayout.CENTER);
 
+        //bikin panel buat tombol
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
         buttonPanel.add(pauseButton);
         statusPanel.add(buttonPanel, BorderLayout.EAST);
 
-
-        // bikin panel board
+        //bikin panel board
         boardPanel = new BoardPanel(board);
         boardPanel.setBackground(GameConstants.COLOR_BG);
         boardPanel.addMouseListener(new MouseAdapter() {
@@ -107,10 +110,12 @@ public class GameBase extends JPanel {
         add(statusPanel, BorderLayout.SOUTH);
     }
 
+    //mengupdate skor labelnya
     public void updateScoreLabel() {
         scoreLabel.setText(playerXName + ": " + playerXScore + "   |   " + playerOName + ": " + playerOScore);
     }
 
+    //mengupdate status barnya
     public void updateStatusBar() {
         if (statusBar == null) return;
         switch (currentState) {
@@ -132,7 +137,6 @@ public class GameBase extends JPanel {
     public void handleClick(int x, int y){
         //buat nanti di override sama childrennya
     };
-
 
     public void showPauseMenu() {
         //bikin pauseOverlay
@@ -180,6 +184,7 @@ public class GameBase extends JPanel {
         exitButton.setFocusPainted(false);
         exitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
+        //saat tombol exit ditekan akan kembali ke start menu/menu utama
         exitButton.addActionListener(e -> {
             JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
             topFrame.getContentPane().removeAll();
@@ -219,4 +224,3 @@ public class GameBase extends JPanel {
         }
     }
 }
-
